@@ -47,6 +47,7 @@ const BOX_TYPES = {
   ref:       (content) => makeBox('ref',       '→ References', content),
   fold:      (content) => makeFold(content),
   playground:(content) => makePlayground(content),
+  gadget:    (content) => makeGadget(content),
 };
 
 // ─── Box Constructors ─────────────────────────────────────────────────────────
@@ -247,6 +248,39 @@ function renderSVGFrames(container, rawOutput) {
     scrubberWrap.appendChild(label);
     container.appendChild(scrubberWrap);
   }
+}
+
+// ─── Gadget (iframe) ─────────────────────────────────────────────────────────
+
+function makeGadget(rawContent) {
+  const config = jsyaml.load(rawContent);
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'box box-gadget';
+
+  const label = document.createElement('div');
+  label.className = 'box-label';
+  label.textContent = '◈ Interactive';
+
+  const iframe = document.createElement('iframe');
+  iframe.src = config.src;
+  iframe.style.cssText = [
+    'width:100%',
+    `height:${config.height || 400}px`,
+    'border:none',
+    'display:block',
+  ].join(';');
+
+  // Resize iframe to fit content if the gadget posts its height
+  window.addEventListener('message', (e) => {
+    if (e.data?.type === 'gadget-height' && e.data.src === config.src) {
+      iframe.style.height = e.data.height + 'px';
+    }
+  });
+
+  wrapper.appendChild(label);
+  wrapper.appendChild(iframe);
+  return wrapper;
 }
 
 // ─── Markdown Post-Processor ──────────────────────────────────────────────────

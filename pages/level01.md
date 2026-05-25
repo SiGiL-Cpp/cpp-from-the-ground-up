@@ -8,7 +8,7 @@ Building a robust understanding of this simple idea will be useful as we explore
 Excellence (in pretty much any domain) is better demonstrated by a deep mastery of its basics, rather than a catalog of obscure subtleties.
 ```
 
-Suppose we have the number `130`. How many ways can we find to look at it? We will consider at least 6 in this page.
+Suppose we have the number `163`. How many ways can we find to look at it? We will consider at least 5 in this page.
 
 ## Byte
 
@@ -22,11 +22,11 @@ We won't go in details over the binary representation of numbers for now as it i
 - [Practical Networking Youtube](https://www.youtube.com/watch?v=RrJXLdv1i74)
 ```
 
-Our number `130` is within the [0..255] range of values, so it can be represented by a Byte.
+Our number `163` is within the [0..255] range of values, so it can be represented by a Byte.
 
 ### Bytes as characters
 
-Since 1961, we have been using a standard called [ASCII](https://en.wikipedia.org/wiki/ASCII) which matches numbers between 0 and 255 to specific characters. According to this convention, the number `130` represents the character `'é'`.
+Since 1961, we have been using a standard called [ASCII](https://en.wikipedia.org/wiki/ASCII) which matches numbers between 0 and 255 to specific characters. According to this convention, the number `163` represents the character `'£'`.
 
 It is worth noting that the character `'1'` in the ASCII standard is associated to the number `49`. Although this number can seem arbitrary when expressed in decimal, it makes more sense for those familiar with its binary representation (32 + 16 + 1).
 
@@ -40,7 +40,7 @@ Although only one binary digit (0, 1) would be sufficient to encode this informa
 
 **Through the boolean lense, numbers are interpreted in this way: if the number is `0`, it is `false`; otherwise, it is `true`.**
 
-So our `130` is `true` if we look at it as a boolean value.
+So our `163` is `true` if we look at it as a boolean value.
 
 <p align="center">
 <img alt="Phineas meme: \"Isn't it a little wasteful? - Yes, yes it is\"" src="imgs/FWastefulMeme.jpg"/>
@@ -140,7 +140,7 @@ And we can continue to divide our 8 ranges of 32 values each into 16 ranges of 1
 
 Or to look at it the binary way, each binaty digit (0, 1) of the Byte is its own boolean value, `false` when it is 0, and `true` when it is 1.
 
-In this representation, our `130` means that the first and seventh boolean values are `true`, while the others (2<sup>nd</sup>, 3<sup>rd</sup>, 4<sup>th</sup>, 5<sup>th</sup>, 6<sup>th</sup>, and 8<sup>th</sup>) are `false`.
+In this representation, our `163` means that the first, third, seventh, and eigth boolean values are `true`, while the others (2<sup>nd</sup>, 4<sup>th</sup>, 5<sup>th</sup>, and 6<sup>th</sup>) are `false`.
 
 ```
 
@@ -209,7 +209,7 @@ To look at it the other way around:
 </svg>
 
 <br/>
-In this representation, our `130` is above 127, so it is interpreted as a negative number: `-126`.
+In this representation, our `163` is above 127, so it is interpreted as a negative number: `-93`.
 
 &nbsp;
 
@@ -225,7 +225,7 @@ The screen displays pixels, and these pixels can send more or less light intensi
 
 - At `0`, it is black <span style="display: inline-block; width: 1.1em; height: 1.1em; background-color: #000000;border: 1px solid var(--text);vertical-align:middle;"></span>.
 - At `255`, it is white <span style="display: inline-block; width: 1.1em; height: 1.1em; background-color: #ffffff;border: 1px solid var(--text);vertical-align:middle;"></span>.
-- At `130`, it is a medium gray <span style="display: inline-block; width: 1.1em; height: 1.1em; background-color: #828282;border: 1px solid var(--text);vertical-align:middle;"></span>.
+- At `163`, it is a medium light-ish gray <span style="display: inline-block; width: 1.1em; height: 1.1em; background-color: #A3A3A3;border: 1px solid var(--text);vertical-align:middle;"></span>.
 
 ### The many Faces of a Byte
 
@@ -237,129 +237,24 @@ The concept behind these interpretations of a same number is Fundamental for pro
 
 Let's take a few minutes to experiment and play with the different representations of a Byte we have discussed above.
 
-<style>
-.gadget { padding: 1rem 0; font-family: var(--font-sans); }
-.row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
-.lbl { font-size: 13px; color: var(--color-text-secondary); width: 110px; flex-shrink: 0; text-align: right; }
-.val { font-size: 15px; font-weight: 500; color: var(--color-text-primary); font-family: var(--font-mono); }
-.note { font-size: 12px; color: var(--color-text-secondary); margin-left: 4px; }
-.bits { display: flex; gap: 4px; }
-.bit { width: 28px; height: 28px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 13px; font-weight: 500; border: 0.5px solid var(--color-border-tertiary); }
-.bit-1 { background: #E6F1FB; color: #0C447C; border-color: #85B7EB; }
-.bit-0 { background: var(--color-background-secondary); color: var(--color-text-secondary); }
-.divider { height: 0.5px; background: var(--color-border-tertiary); margin: 16px 0; }
-.result-val { font-size: 22px; font-weight: 500; font-family: var(--font-mono); color: var(--color-text-primary); }
-.result-note { font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; }
-</style>
+```gadget
+src: gadgets/byte-lens.html
+height: 300
+```
 
-<div class="gadget">
-  <h2 class="sr-only">Byte lens gadget — enter a number and pick a lens to see how a single byte interprets it</h2>
+## A Handful of Bytes
 
-  <div class="row">
-    <span class="lbl">your number</span>
-    <input type="number" id="inp" value="130" step="1" style="width:120px;" />
-  </div>
+There is only so much we can do with 256 values.
 
-  <div class="row">
-    <span class="lbl">as uint8</span>
-    <span class="val" id="u8val">130</span>
-    <span class="note" id="u8note"></span>
-  </div>
+### Two Bytes
 
-  <div class="row" style="align-items:flex-start; margin-top:2px;">
-    <span class="lbl" style="padding-top:4px;">bits</span>
-    <div class="bits" id="bits"></div>
-  </div>
+In decimal, 2-digit numbers give 100 different values. But if we stack together two of those, we get a 4-digit number which can represent 10.000 values.
 
-  <div class="divider"></div>
+In the same way, if we stack two Bytes together, we don't just double the number of possible values, we multiply them, giving `65.536` possible values.
 
-  <div class="row">
-    <span class="lbl">lens</span>
-    <select id="lens">
-      <option value="uint8">uint8 — unsigned byte</option>
-      <option value="int8">int8 — signed byte</option>
-      <option value="char">char — ASCII character</option>
-      <option value="bool">bool — true / false</option>
-      <option value="hex">hex — base 16</option>
-    </select>
-  </div>
+Although many things are "implementation defined", meaning that there are no hard and true rule, two Bytes together, or to put it another way, a 16 binary digit number, is often called a half-word.
 
-  <div class="row" style="margin-top: 6px; align-items: flex-start;">
-    <span class="lbl" style="padding-top:2px;">result</span>
-    <div>
-      <div class="result-val" id="result-val"></div>
-      <div class="result-note" id="result-note"></div>
-    </div>
-  </div>
-</div>
-
-<script>
-const inp  = document.getElementById('inp');
-const lens = document.getElementById('lens');
-
-const lenses = {
-  uint8: (u8) => ({
-    val: String(u8),
-    note: 'unsigned, range 0 → 255'
-  }),
-  int8: (u8) => {
-    const buf = new ArrayBuffer(1);
-    new DataView(buf).setUint8(0, u8);
-    const i8 = new DataView(buf).getInt8(0);
-    return {
-      val: String(i8),
-      note: i8 < 0
-        ? `signed, range −128 → 127 — values 128..255 wrap to −128..−1`
-        : 'signed, range −128 → 127'
-    };
-  },
-  char: (u8) => {
-    const names = {0:'\\0 (null)',8:'\\b (backspace)',9:'\\t (tab)',10:'\\n (newline)',13:'\\r (carriage return)',27:'ESC'};
-    if (names[u8]) return { val: names[u8], note: 'non-printable control character' };
-    if (u8 < 32)   return { val: '(control char)', note: `ASCII ${u8}, non-printable` };
-    if (u8 < 127)  return { val: `'${String.fromCharCode(u8)}'`, note: `printable ASCII — code ${u8}` };
-    if (u8 === 127) return { val: 'DEL', note: 'delete control character' };
-    return { val: `'${String.fromCharCode(u8)}'`, note: `extended ASCII — code ${u8}` };
-  },
-  bool: (u8) => ({
-    val: u8 === 0 ? 'false' : 'true',
-    note: u8 === 0 ? 'zero is the only false value' : `any non-zero value is true (here: ${u8})`
-  }),
-  hex: (u8) => ({
-    val: '0x' + u8.toString(16).toUpperCase().padStart(2, '0'),
-    note: `base 16 — each digit represents 4 bits`
-  }),
-};
-
-function update() {
-  const raw = parseInt(inp.value, 10);
-  if (isNaN(raw)) return;
-
-  const buf = new ArrayBuffer(1);
-  new DataView(buf).setUint8(0, raw);
-  const u8 = new DataView(buf).getUint8(0);
-
-  document.getElementById('u8val').textContent = u8;
-  const note = document.getElementById('u8note');
-  note.textContent = raw !== u8
-    ? (raw < 0 ? `(${raw} wrapped around)` : `(${raw} truncated to 8 bits)`)
-    : '';
-
-  const binStr = u8.toString(2).padStart(8, '0');
-  document.getElementById('bits').innerHTML = binStr.split('').map(b =>
-    `<div class="bit ${b==='1'?'bit-1':'bit-0'}">${b}</div>`
-  ).join('');
-
-  const { val, note: lnote } = lenses[lens.value](u8);
-  document.getElementById('result-val').textContent = val;
-  document.getElementById('result-note').textContent = lnote;
-}
-
-inp.addEventListener('input', update);
-lens.addEventListener('change', update);
-update();
-</script>
-
+A notable example of usage of 2-Byte wide values is windows "wide characters".
 
 --------
 

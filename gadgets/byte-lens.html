@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Byte lens</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0f1117;
+      --surface:  #181c26;
+      --border:   #2a2f3d;
+      --text:     #cdd4e0;
+      --muted:    #5a6580;
+      --mono:     'IBM Plex Mono', 'Fira Mono', monospace;
+      --sans:     'IBM Plex Sans', system-ui, sans-serif;
+      --blue-bg:  #1a2a4a;
+      --blue-fg:  #aaccff;
+      --blue-brd: #2a4a8a;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg:       #f5f4f0;
+        --surface:  #eeedea;
+        --border:   #d0cdc8;
+        --text:     #1e1c1a;
+        --muted:    #888480;
+        --blue-bg:  #dce8ff;
+        --blue-fg:  #1a3aaa;
+        --blue-brd: #85b7eb;
+      }
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      padding: 1rem 1.25rem 1.25rem;
+      line-height: 1.5;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .lbl {
+      font-size: 12px;
+      color: var(--muted);
+      width: 90px;
+      flex-shrink: 0;
+      text-align: right;
+    }
+
+    input[type=number], select {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 0.3rem 0.5rem;
+      outline: none;
+    }
+
+    input[type=number] { width: 110px; }
+    input[type=number]:focus, select:focus { border-color: var(--blue-fg); }
+
+    select { cursor: pointer; }
+
+    .mono { font-family: var(--mono); }
+
+    .u8-val {
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .u8-note {
+      font-size: 11px;
+      color: var(--muted);
+      margin-left: 4px;
+    }
+
+    .bits {
+      display: flex;
+      gap: 3px;
+      flex-wrap: wrap;
+    }
+
+    .bit {
+      width: 26px;
+      height: 26px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+    }
+
+    .bit-1 {
+      background: var(--blue-bg);
+      color: var(--blue-fg);
+      border-color: var(--blue-brd);
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 14px 0;
+    }
+
+    .result-val {
+      font-family: var(--mono);
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .result-note {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .swatch-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .swatch {
+      width: 48px;
+      height: 48px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="row">
+    <span class="lbl">your number</span>
+    <input type="number" id="inp" value="163" step="1" />
+  </div>
+
+  <div class="row">
+    <span class="lbl">as uint8</span>
+    <span class="u8-val" id="u8val">163</span>
+    <span class="u8-note" id="u8note"></span>
+  </div>
+
+  <div class="row" style="align-items:flex-start;">
+    <span class="lbl" style="padding-top:5px;">bits</span>
+    <div class="bits" id="bits"></div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="row">
+    <span class="lbl">lens</span>
+    <select id="lens">
+      <option value="uint8">uint8 — unsigned byte</option>
+      <option value="int8">int8 — signed byte</option>
+      <option value="char">char — ASCII character</option>
+      <option value="bool">bool — true / false</option>
+      <option value="gray">gray — light intensity</option>
+      <option value="hex">hex — base 16</option>
+      <option value="binary">binary — base 2</option>
+    </select>
+  </div>
+
+  <div class="row" style="align-items:flex-start; margin-top:4px;">
+    <span class="lbl" style="padding-top:2px;">result</span>
+    <div>
+      <div class="result-val" id="result-val"></div>
+      <div id="result-extra"></div>
+      <div class="result-note" id="result-note"></div>
+    </div>
+  </div>
+
+  <script>
+    const inp  = document.getElementById('inp');
+    const lsel = document.getElementById('lens');
+
+    const CTRL = {8:'\\b (backspace)',9:'\\t (tab)',10:'\\n (newline)',13:'\\r (carriage return)',27:'ESC',0:'\\0 (null)'};
+
+    const lenses = {
+      uint8:  (u8) => ({ val: String(u8),  note: 'unsigned integer — range 0 to 255' }),
+      int8:   (u8) => {
+        const v = u8 >= 128 ? u8 - 256 : u8;
+        return { val: String(v), note: v < 0 ? 'values 128..255 map to −128..−1' : 'signed integer — range −128 to 127' };
+      },
+      char: (u8) => {
+        if (CTRL[u8] !== undefined) return { val: CTRL[u8], note: 'non-printable control character' };
+        if (u8 < 32)   return { val: '(control char)', note: `ASCII ${u8} — non-printable` };
+        if (u8 === 127) return { val: 'DEL', note: 'delete control character' };
+        const ch = new TextDecoder('windows-1252').decode(new Uint8Array([u8]));
+        const printable = ch.charCodeAt(0) > 31;
+        return printable
+          ? { val: `'${ch}'`, note: `extended ASCII — code ${u8}` }
+          : { val: '(control char)', note: `ASCII ${u8} — non-printable` };
+      },
+      bool:   (u8) => ({ val: u8 === 0 ? 'false' : 'true', note: u8 === 0 ? 'zero is the only false value' : `any non-zero value is true` }),
+      gray:   (u8) => ({ val: `${u8} / 255`, note: 'light intensity — 0 is black, 255 is white', swatch: `rgb(${u8},${u8},${u8})` }),
+      hex:    (u8) => ({ val: '0x' + u8.toString(16).toUpperCase().padStart(2,'0'), note: 'base 16 — each digit represents 4 bits' }),
+      binary: (u8) => ({ val: '0b' + u8.toString(2).padStart(8,'0'), note: 'base 2 — the raw bit pattern' }),
+    };
+
+    function update() {
+      const raw = parseInt(inp.value, 10);
+      if (isNaN(raw)) return;
+
+      const buf = new ArrayBuffer(1);
+      new DataView(buf).setUint8(0, raw);
+      const u8 = new DataView(buf).getUint8(0);
+
+      document.getElementById('u8val').textContent = u8;
+      document.getElementById('u8note').textContent = raw !== u8
+        ? (raw < 0 ? `(${raw} wrapped around)` : `(${raw} truncated to 8 bits)`)
+        : '';
+
+      const bin = u8.toString(2).padStart(8, '0');
+      document.getElementById('bits').innerHTML = bin.split('').map(b =>
+        `<div class="bit ${b==='1'?'bit-1':''}">${b}</div>`
+      ).join('');
+
+      const { val, note, swatch } = lenses[lsel.value](u8);
+      document.getElementById('result-val').textContent = val;
+      document.getElementById('result-note').textContent = note;
+
+      const extra = document.getElementById('result-extra');
+      if (swatch) {
+        extra.innerHTML = `<div class="swatch-row">
+          <div class="swatch" style="background:${swatch};"></div>
+          <span class="result-note">${swatch}</span>
+        </div>`;
+      } else {
+        extra.innerHTML = '';
+      }
+
+      // Tell parent iframe our content height
+      window.parent.postMessage({
+        type: 'gadget-height',
+        src: window.location.pathname,
+        height: document.body.scrollHeight
+      }, '*');
+    }
+
+    inp.addEventListener('input', update);
+    lsel.addEventListener('change', update);
+    update();
+  </script>
+</body>
+</html>

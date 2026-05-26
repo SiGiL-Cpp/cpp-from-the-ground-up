@@ -138,7 +138,7 @@ And we can continue to divide our 8 ranges of 32 values each into 16 ranges of 1
 - 128 ranges of 2 values, giving 7 booleans,
 - and finally 256 ranges of 1 value, giving 8 booleans.
 
-Or to look at it the binary way, each binaty digit (0, 1) of the Byte is its own boolean value, `false` when it is 0, and `true` when it is 1.
+Or to look at it the binary way, each binary digit (0, 1) of the Byte is its own boolean value, `false` when it is 0, and `true` when it is 1.
 
 In this representation, our `163` means that the first, third, seventh, and eigth boolean values are `true`, while the others (2<sup>nd</sup>, 4<sup>th</sup>, 5<sup>th</sup>, and 6<sup>th</sup>) are `false`.
 
@@ -227,6 +227,55 @@ The screen displays pixels, and these pixels can send more or less light intensi
 - At `255`, it is white <span style="display: inline-block; width: 1.1em; height: 1.1em; background-color: #ffffff;border: 1px solid var(--text);vertical-align:middle;"></span>.
 - At `163`, it is a medium light-ish gray <span style="display: inline-block; width: 1.1em; height: 1.1em; background-color: #A3A3A3;border: 1px solid var(--text);vertical-align:middle;"></span>.
 
+### Byte as fixed point
+
+We now have positive and negative numbers, but there's a whole infinity of numbers between 0 and 1. How do we tap into this range? The most common way is through floating-point, but floating-points are complicated. I'll treat them as in a folding box just below. For now, we will look at the much simpler fixed point.
+
+We have 256 values, ranging by default from 0 to 255. The question is how much detail do we want. We could decide that what we count, 0, 1, 2, 3, 4... are halves and not wholes, so it would go 0, 0.5, 1, 1.5, 2... Or we could decide we're counting quarters, or eigths. This is just another filter of interpretation.
+
+We could combine that with the [Signed Byte](#signed-byte) trick with this, and have signed values that represent 8th: [-32, -31.75, -31.5, -31.25 .. -0.5, -0.25, 0, 0.25, 0.5 .. 31.25, 31.5, 31.75].
+
+For `163`, as a signed fixed-point with 4 integer binary digits and 3 fractional binary digits (i.e. made of 8<sup>th</sup>), we have already worked out that it reads as `-93` as a [Signed Byte](#signed-bytes). If we consider it made of 8<sup>th</sup>, we have -93/8 = `-11.625`.
+
+```fold
+### Byte as floating point
+
+The floating-point representation will make more sense later on, but I wanted to introduce it here, as it is heavily used in all kind of applications, and more tricky than most people realise.
+
+This representation breaks our 8 binary digits into 3 parts:
+- The first digit is for the sign of the number: 0 for positive numbers, 1 for negative numbers.
+- Then a few digits for something called the Exponent.
+- And the remaining digits for what is called the Mantissa.
+
+There are different format. In the E4M3 format, the Exponent uses 4 digits, and the Mantissa 3 (hence E4M3), leaving 1 digit for the sign.
+
+The short version is that the number is computed as `sign` 2<sup>`Exponent`</sup> `Mantissa`.
+
+But that's not even half of the headache.
+
+- The `sign` is simple enough, let's celebrate this.
+- The `Exponent` has special values. Both it's minimum and maximum values as special.
+- The other values of the `Exponent` that are less special have a "bias". Nothing romantic, it means that we have to subtract a specific value (the bias) from the raw number to know its value. In E4M3 format the bias is typically 7. So if the raw value of the Expnent is 1, we should read the exponent as -6. If the raw value is 7, we should read it as 0. If the raw value is 14 (1 less than the maximum value we can represent with 4 bits), we should read it as 7.
+- The `Mantissa` is a [fixed point](#fixed-point) number. It is scaled based on its number of bits: if it has 3 digits, it is divided by 2<sup>3</sup> (i.e. it represents 8<sup>th</sup>).
+- If the `Exponent` raw value is not 0 (which is a special case mentioned above), the `Mantissa` should be read as if there was an additional digit set to 1 before it (implicit leading 1).
+
+And then there are all the special cases.
+
+For instance, if I was to split `163` according to the E4M3 format, I would get this:
+- `1` for the sign,
+- `4` for the raw Exponent,
+- `3` for the Mantissa.
+
+The Exponent is neither 0 nor 15, so we read it by subtracting 7 from it. 4 - 7 = `-3`.
+
+Since the Exponent is not 0, we should read the Mantissa as a fixed point number made of 8<sup>th</sup> and add a leading 1 before it. Three 8<sup>th</sup> is `0.375`, and with a leading 0, we get `1.375`.
+
+We can finally form the final result: - 2<sup>-3</sup> × 1.375 = - 0.125 × 1.375 = `-0.171875`.
+
+The subtlety and complexity of floating point numbers is astonishing, but fortunately, their usage is simple. This makes them a double-edged sword: easy to use and powerful... until we start to look at them from up close.
+
+```
+
 ### The many Faces of a Byte
 
 ```rec
@@ -248,13 +297,27 @@ There is only so much we can do with 256 values.
 
 ### Two Bytes
 
-In decimal, 2-digit numbers give 100 different values. But if we stack together two of those, we get a 4-digit number which can represent 10.000 values.
+In decimal, 2-digit numbers give 100 different values (0..99). But if we stack together two of those, we get a 4-digit number which can represent 10.000 values (0..9999).
 
 In the same way, if we stack two Bytes together, we don't just double the number of possible values, we multiply them, giving `65.536` possible values.
 
-Although many things are "implementation defined", meaning that there are no hard and true rule, two Bytes together, or to put it another way, a 16 binary digit number, is often called a half-word.
+We will come back to values encoded over two Bytes a bit later, especially when we look at audio formats.
 
-A notable example of usage of 2-Byte wide values is windows "wide characters".
+### A different kind of Word
+
+A Word in computing, used to refer to the "default" or "natural" size of the data for a specific architecture. So a Word is not a specific, set number of Bytes. The default size of a unit of data grew over time, and is often currently, either 4 Bytes (32 bits) or 8 Bytes (64 bits) for the most common architectures.
+
+```trivia
+The x86 architecture used, a long time ago, a Word that was 2 Bytes long. When they later doubled that, evolving the architecture to use 4-Byte-long values as the natural "default", they decided to keep their old definition of Word as a 2-Byte-long value, and called the new 4-Byte values Doubleword (DWORD). Later, 8-Byte-long values were introduced as Quadwords (QWORD).
+
+This departure from the original definition of a Word creates ambiguity, and we will prefer starting to call the types by their number of bits (a bit is a binary digit, there are 8 bits in a Byte).
+```
+
+
+
+
+
+Why stop with only two Bytes stacked? A `Word`is the "default" or "natural" data size of a given computer architecture. These days, it is usually either 4 Bytes (32 bits) or 8 Bytes (64 bits).
 
 --------
 

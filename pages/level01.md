@@ -26,7 +26,7 @@ Our number `163` is within the [0..255] range of values, so it can be represente
 
 ### Bytes as characters
 
-Since 1961, we have been using a standard called [ASCII](https://en.wikipedia.org/wiki/ASCII) which matches numbers between 0 and 255 to specific characters. According to this convention, the number `163` represents the character `'£'`.
+Since 1961, we have been using a standard called <a href="https://en.wikipedia.org/wiki/ASCII" target="_blank" rel="noopener">ASCII</a> which matches numbers between 0 and 255 to specific characters. According to this convention, the number `163` represents the character `'£'`.
 
 It is worth noting that the character `'1'` in the ASCII standard is associated to the number `49`. Although this number can seem arbitrary when expressed in decimal, it makes more sense for those familiar with its binary representation (32 + 16 + 1).
 
@@ -34,7 +34,7 @@ It is a very common way of interpreting numbers as (latin) characters, but by no
 
 ### Bytes as true/false, on/off, yes/no values
 
-Such value pairs are called Boolean values (from [George Boole](https://en.wikipedia.org/wiki/George_Boole)), and are extremely common as they represent the simplest switch between two states, such as the dark/light theme switch in the upper-right corner of this page, the ever-present tickbox, or a light switch.
+Such value pairs are called Boolean values (from <a href="https://en.wikipedia.org/wiki/George_Boole" target="_blank" rel="noopener">George Boole</a>, and are extremely common as they represent the simplest switch between two states, such as the dark/light theme switch in the upper-right corner of this page, the ever-present tickbox, or a light switch.
 
 Although only one binary digit (0, 1) would be sufficient to encode this information, in C++ a full Byte (8 binary digits) are used for the boolean representation. The reasons for this will be explained much later in this series, but for now, a hand-wavy explanation would be that the computer only ever works on at least one Byte, 8 binary digits.
 
@@ -233,7 +233,7 @@ We now have positive and negative numbers, but there's a whole infinity of numbe
 
 We have 256 values, ranging by default from 0 to 255. The question is how much detail do we want. We could decide that what we count, 0, 1, 2, 3, 4... are halves and not wholes, so it would go 0, 0.5, 1, 1.5, 2... Or we could decide we're counting quarters, or eigths. This is just another filter of interpretation.
 
-We could combine that with the [Signed Byte](#signed-byte) trick with this, and have signed values that represent 8th: [-32, -31.75, -31.5, -31.25 .. -0.5, -0.25, 0, 0.25, 0.5 .. 31.25, 31.5, 31.75].
+We could combine that with the [Signed Byte](#signed-bytes) trick with this, and have signed values that represent 8th: [-32, -31.75, -31.5, -31.25 .. -0.5, -0.25, 0, 0.25, 0.5 .. 31.25, 31.5, 31.75].
 
 For `163`, as a signed fixed-point with 4 integer binary digits and 3 fractional binary digits (i.e. made of 8<sup>th</sup>), we have already worked out that it reads as `-93` as a [Signed Byte](#signed-bytes). If we consider it made of 8<sup>th</sup>, we have -93/8 = `-11.625`.
 
@@ -256,7 +256,7 @@ But that's not even half of the headache.
 - The `sign` is simple enough, let's celebrate this.
 - The `Exponent` has special values. Both it's minimum and maximum values as special.
 - The other values of the `Exponent` that are less special have a "bias". Nothing romantic, it means that we have to subtract a specific value (the bias) from the raw number to know its value. In E4M3 format the bias is typically 7. So if the raw value of the Expnent is 1, we should read the exponent as -6. If the raw value is 7, we should read it as 0. If the raw value is 14 (1 less than the maximum value we can represent with 4 bits), we should read it as 7.
-- The `Mantissa` is a [fixed point](#fixed-point) number. It is scaled based on its number of bits: if it has 3 digits, it is divided by 2<sup>3</sup> (i.e. it represents 8<sup>th</sup>).
+- The `Mantissa` is a [fixed point](#byte-as-fixed-point) number. It is scaled based on its number of bits: if it has 3 digits, it is divided by 2<sup>3</sup> (i.e. it represents 8<sup>th</sup>).
 - If the `Exponent` raw value is not 0 (which is a special case mentioned above), the `Mantissa` should be read as if there was an additional digit set to 1 before it (implicit leading 1).
 
 And then there are all the special cases.

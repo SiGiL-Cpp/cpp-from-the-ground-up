@@ -38,6 +38,17 @@ function toggleTheme() {
   applyTheme(next);
 }
 
+// ─── Marked Config ────────────────────────────────────────────────────────────
+
+marked.use({
+  renderer: {
+    heading(text, level) {
+      const id = text.toLowerCase().replace(/[^\w]+/g, '-');
+      return `<h${level} id="${id}">${text}</h${level}>`;
+    }
+  }
+});
+
 // ─── Box Registry ─────────────────────────────────────────────────────────────
 
 const BOX_TYPES = {

@@ -161,26 +161,26 @@ body {
 
 /* ─── Box Variants ─────────────────────────────────────────────────────────── */
 
-.box-rec       { background: var(--rec);  border-color: var(--rec-border); }
-.box-rec       .box-label { color: var(--rec-label);  background: #162e22; }
+.box-rec         { background: var(--rec);  border-color: var(--rec-border); }
+.box-rec       > .box-label { color: var(--rec-label);  background: #162e22; }
 
-.box-important { background: var(--imp);  border-color: var(--imp-border); }
-.box-important .box-label { color: var(--imp-label);  background: #2e1812; }
+.box-important   { background: var(--imp);  border-color: var(--imp-border); }
+.box-important > .box-label { color: var(--imp-label);  background: #2e1812; }
 
-.box-trivia    { background: var(--tri);  border-color: var(--tri-border); }
-.box-trivia    .box-label { color: var(--tri-label);  background: #14202e; }
+.box-trivia      { background: var(--tri);  border-color: var(--tri-border); }
+.box-trivia    > .box-label { color: var(--tri-label);  background: #14202e; }
 
-.box-ref       { background: var(--ref);  border-color: var(--ref-border); }
-.box-ref       .box-label { color: var(--ref-label);  background: #1e1e14; }
+.box-ref         { background: var(--ref);  border-color: var(--ref-border); }
+.box-ref       > .box-label { color: var(--ref-label);  background: #1e1e14; }
 
-.box-info      { background: var(--info); border-color: var(--info-border); }
-.box-info      .box-label { color: var(--info-label); background: #18182a; }
+.box-info        { background: var(--info); border-color: var(--info-border); }
+.box-info      > .box-label { color: var(--info-label); background: #18182a; }
 
-.box-playground { background: var(--play); border-color: var(--play-border); }
-.box-playground .box-label { color: var(--play-label); background: #0e1428; }
+.box-playground   { background: var(--play); border-color: var(--play-border); }
+.box-playground > .box-label { color: var(--play-label); background: #0e1428; }
 
-.box-gadget    { background: var(--play); border-color: var(--play-border); }
-.box-gadget    .box-label { color: var(--play-label); background: #0e1428; }
+.box-gadget      { background: var(--play); border-color: var(--play-border); }
+.box-gadget    > .box-label { color: var(--play-label); background: #0e1428; }
 
 /* ─── Foldable boxes ───────────────────────────────────────────────────────── */
 /* Applied to any box type when a fold marker (> or <) is used in the fence.   */

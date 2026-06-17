@@ -1,81 +1,139 @@
 # 01 - Data
 
-At the core, a computer is a glorified calculator. It manipulates numbers. This means that whether we browse videos online, listen for music, or play online, all we see is built off numbers.
+At the core, a computer is a glorified calculator. It manipulates numbers. This
+means that whether we browse videos online, listen for music, or play a
+multiplayer game, all we see is built off numbers.
 
-Building a robust understanding of this simple idea will be useful as we explore and "rebuild" C++ from its most elementary pieces.
+Building a robust understanding of this simple idea will be useful as we explore
+and "rebuild" C++ from its most elementary pieces.
 
-```trivia
-Excellence in (pretty much) any domain is better demonstrated by a deep mastery of its basics, rather than a catalog of its most obscure subtleties.
+```trivia: Principle
+Excellence in (pretty much) any domain is better demonstrated by a deep mastery
+of its basics, rather than a catalog of its most obscure subtleties. 
 ```
 
-Suppose we have the number `163`. How many ways can we find to look at it? We will consider at least 6 different interpretation for it in this page.
+```rec: Example
+In this level we will use the number `163` for our examples.
+
+How many ways can we find to look at it? We will consider at least 6 different
+interpretation for it in this page.
+```
 
 ## Byte
 
-In base 10 (decimal), where each of the digit used to write a number can take one of 10 values (0..9), a 3-digit number can express 1000 different values: from 0 to 999.
+In base 10 (decimal), where each of the digit used to write a number can take
+one of 10 values (0..9), a 3-digit number can express 1000 different values:
+from 0 to 999.
 
-Similarly, in base 2 (binary), where each of the digit used to write a number can take only one of 2 values (0, 1), a **Byte** is an 8-digit number which can express 256 different values: from 0 to 255.
+Similarly, in base 2 (binary), where each of the digit used to write a number
+can take only one of 2 values (0, 1), a **Byte** is an 8-digit number which can
+express 256 different values: from 0 to 255.
 
 ```ref
-We won't go in details over the binary representation of numbers for now as it is not required for our current purpose. If you wish to investigate the subject, there are many good resources on the subject.
+We won't go in details over the binary representation of numbers for now as it
+is not required for our current purpose. If you wish to investigate the subject,
+there are many good resources on the subject.
 - [Khan Academy](https://www.khanacademy.org/computing/computers-and-internet/xcae6f4a7ff015e7d:digital-information/xcae6f4a7ff015e7d:binary-numbers/a/bits-and-binary)
 - [Practical Networking Youtube](https://www.youtube.com/watch?v=RrJXLdv1i74)
 ```
 
-Our number `163` is within the [0..255] range of values, so it can be represented by a Byte.
+```rec: Example
+Our number `163` is within the [0..255] range of values, so it can be
+represented by a Byte.
+```
 
 ### Bytes as characters
 
-Since 1961, we have been using a standard called <a href="https://en.wikipedia.org/wiki/ASCII" target="_blank" rel="noopener">ASCII</a> which matches numbers between 0 and 255 to specific characters. According to this convention, the number `163` represents the character `'£'`.
+Since 1961, we have been using a standard called <a
+href="https://en.wikipedia.org/wiki/ASCII" target="_blank"
+rel="noopener">ASCII</a> which matches numbers between 0 and 255 to specific
+characters.
 
-It is worth noting that the character `'1'` in the ASCII standard is encoded by the number `49`. Although this number can seem arbitrary when expressed in decimal, it makes more sense for those familiar with its binary representation (32 + 16 + 1).
+```rec: Example
+According to this convention, the number `163` represents the
+character `'£'`.
+```
 
-ASCII is a very common way of interpreting numbers as (latin) characters, but by no means the only one.
+It is worth noting that the character `'1'` in the ASCII standard is encoded by
+the number `49`. Although this number can seem arbitrary when expressed in
+decimal, it makes more sense for those familiar with its binary representation
+(32 + 16 + 1).
+
+ASCII is a very common way of interpreting numbers as (latin) characters, but by
+no means the only one.
 
 ### Bytes as true/false, on/off, yes/no values
 
-Such value pairs are called Boolean values (from <a href="https://en.wikipedia.org/wiki/George_Boole" target="_blank" rel="noopener">George Boole</a>), and are extremely common as they represent the simplest switch between two states, such as the dark/light theme switch in the upper-right corner of this page, the ever-present tickbox, or a "yes/no" answer.
+Such value pairs are called Boolean values (from <a
+href="https://en.wikipedia.org/wiki/George_Boole" target="_blank"
+rel="noopener">George Boole</a>), and are extremely common as they represent the
+simplest switch between two states, such as the dark/light theme switch in the
+upper-right corner of this page, the ever-present tickbox, or a "yes/no" answer.
 
-Although only one binary digit (0, 1) would be sufficient to encode this information, in C++ a full Byte (8 binary digits) are used for the boolean representation. The reasons for this will be explained much later in this series, but for now, a hand-wavy explanation would be that the computer only ever works on at least one Byte, 8 binary digits.
+Although only one binary digit (0, 1) would be sufficient to encode this
+information, in C++ a full Byte (8 binary digits) are used for the boolean
+representation. The reasons for this will be explained much later in this
+series, but for now, a hand-wavy explanation would be that the computer only
+ever works on at least one Byte: 8 binary digits.
 
-**Through the boolean lense, numbers are interpreted in this way: if the number is `0`, it is `false`; otherwise, it is `true`.**
+**Through the boolean lense, numbers are interpreted in this way: if the number
+is `0`, it is `false`; otherwise, it is `true`.**
 
+```rec: Example
 So our `163` is `true` if we look at it as a boolean value.
+```
 
 <p align="center">
-<img alt="Phineas meme: \"Isn't it a little wasteful? - Yes, yes it is\"" src="imgs/FWastefulMeme.jpg"/>
+  <img alt="Phineas meme: \"Isn't it a little wasteful? - Yes, yes it is\""
+    src="imgs/FWastefulMeme.jpg"/>
 </p>
 
-```fold
-#### Can we do better? Bytes as multiple booleans...
+Now, programmers usually hate wasting. If you are curious you can expand this
+box:
 
-Sometimes, we want to store several true/false values, for instance when storing user preferences which are often a collection of yes/no answers. In this case, we sometimes decide to look at the Byte as multiple true/false values at once.
+````info> Can we do better? Bytes as multiple booleans...
 
-Since a simple true/false value can be expressed using a single binary digit (0, 1), and a Byte is made of 8 binary digits, we can store the values of up to 8 true/false values in a single Byte.
+Sometimes, we want to store several true/false values, for instance when storing
+user preferences which are often a collection of yes/no answers. In this case,
+we sometimes decide to look at the Byte as multiple true/false values at once.
 
-The downside of this approach is its added complexity: it is more complex and more error-prone to write and retrieve these values.
+Since a simple true/false value can be expressed using a single binary digit (0,
+1), and a Byte is made of 8 binary digits, we can store the values of up to 8
+true/false values in a single Byte.
 
-Readers who are familiar with binary representations probably understand this immediately.
+The downside of this approach is its added complexity: it is a little more
+involced and more error-prone to write and retrieve these values.
 
-Since a Byte is a number made of 8 digits that can take one of two values each (0 or 1), each digit can encode a true (1) or false (0) value.
+Readers who are familiar with binary representations probably understand this
+immediately.
+
+Since a Byte is a number made of 8 digits that can take one of two values each
+(0 or 1), each digit can encode a true (1) or false (0) value.
 
 You could visualise the Byte as a row of 8 switches:
 
 <p align="center">
-<img alt="8 switches" src="imgs/8switches.webp"/>
+  <img alt="8 switches" src="imgs/8switches.webp"/>
 </p>
 
-Each switch is one of the 8 digits, and when the switch is off, that specific digit is 0; when that switch is on, that specific digit is 1.
+Each switch is one of the 8 digits, and when the switch is off, that specific
+digit is 0; when that switch is on, that specific digit is 1.
 
-The number `163` in this representation would be Switch 1, 3, 7, and 8 in position "On", and Switches 2, 4, 5, and 6 in position "Off".
+```rec: Example
+The number `163` in this representation would be Switch 1, 3, 7, and 8 in
+position "On", and Switches 2, 4, 5, and 6 in position "Off".
 <br/>
-Or the sequece `true`, `false`, `true`, `false`, `false`, `false`, `true`, `true`.
-
+Or the sequece `true`, `false`, `true`, `false`, `false`, `false`, `true`,
+`true`.
 ```
+
+````
 
 ### Signed Bytes
 
-A range from 0 to 255 is useful, but sometimes we also want to use negative values. Since our Byte can only represent 256 distinct values, we will have to repurpose some of its values to become negative.
+A range from 0 to 255 is useful, but sometimes we also want to use negative
+values. Since our Byte can only represent 256 distinct values, we will have to
+repurpose some of its values to become negative.
 
 <svg width="592" height="50" style="display:block;margin:auto; --rect-width: 588px;--neg-width: 294px;">
     <rect x="2" y="2" style="width:var(--neg-width);" height="40" fill="var(--rec)" stroke="rgb(128,128,128)" stroke-width="2"/>
@@ -84,7 +142,9 @@ A range from 0 to 255 is useful, but sometimes we also want to use negative valu
     <text x="2" y="27" style="transform:translateX(calc(3 * var(--neg-width) / 2));" fill="var(--text)" font-family="sans-serif" font-size="14" text-anchor="middle">[128..255]</text>
 </svg>
 
-<br/>We achieve this by splitting the values of the Byte in two. The first half remains unchanged [0..127] continue to represent the numbers from 0 to 127, but the second half, from 128 to 255 is moved to the negative range.<br/>
+<br/>We achieve this by splitting the values of the Byte in two. The first half
+remains unchanged: [0..127] continue to represent the numbers from 0 to 127, but
+the second half, from 128 to 255 is moved to the negative range.<br/>
 
 <svg width="592" height="100" style="display:block;margin:auto; --rect-width: 588px;--neg-width: 294px;" viewBox="-100,0,592, 100">
     <rect x="2" y="2" style="transform:translateX(var(--neg-width));width:var(--neg-width);" height="40" fill="none" stroke="rgb(128,128,128)" stroke-width="2" stroke-dasharray="5,5" />
@@ -99,7 +159,9 @@ A range from 0 to 255 is useful, but sometimes we also want to use negative valu
 </svg>
 
 <br/>
-We have to be a little careful there. In a similar way that the character `'1'` was an interpretation of the number `49`, the negative numbers [-128..-1] are an interpretation of the numbers in the range [128..255].
+We have to be a little careful there. In a similar way that the character `'1'`
+was an interpretation of the number `49`, the negative numbers [-128..-1] are an
+interpretation of the numbers in the range [128..255].
 <br/><br/>
 
 <svg width="592" height="100" style="display:block;margin:auto; --rect-width: 588px;--neg-width: 294px;">
@@ -134,15 +196,48 @@ To look at it the other way around:
 </svg>
 
 <br/>
-In this representation, our `163` is above 127, so it is interpreted as a negative number: `-93`.
 
-&nbsp;
-
-```trivia
-Notice the asymetry between the largest `127` and lowest `-128` values that can be represented with a signed Byte.
-
-This is due to having `0` between the strictly positive and strictly negative numbers, but an even number of possible values for a Byte (256). So there are 128 strictly negative values, 1 zero, and 127 strictly positive values.
+```rec: Example
+In this representation, our `163` is above 127, so it is interpreted as a
+negative number: `-93`.
 ```
+
+````trivia: Subtlety
+Notice the asymetry between the largest `127` and lowest `-128` values that can
+be represented with a signed Byte.
+
+This is due to having `0` between the strictly positive and strictly negative
+numbers, but an even number of possible values for a Byte (256). So there are
+128 strictly negative values, 1 zero, and 127 strictly positive values.
+
+Because of this, taking the negative of a signed Byte whose value is `-128` is
+an invalid operation (Undefined Behaviour), as it would yield `128` which cannot
+be represented as a signed Byte. In practice, although doing this operation
+could lead to a crash, many compilers would return `-128` as the result for this
+operation (`-(-128)` => `-128`), which is obviously mathematically incorrect,
+and can be quite confusing.
+
+```info> Why? (Requires familiarity with binary representations)
+In practice, to negate a signed integer, the CPU is likely to invert all the
+bits and add 1.
+
+Yes, that works. In all the valid cases.
+
+- Consider `1`. Inverting all the bits gives `0b11111110` (`0xFE`). And adding 1
+  to this gives `0b11111111` (`0xFF`), 255, which, if you check above, happens
+  to be the representation of `-1` (255),
+- Consider `-127`, which is `0b10000001` (`0x81`). If we invert it, we get
+  `0b01111110` (`0x7E`). + 1 => `0b01111111` (`0x7F`), 127.
+- Consider `0`. Inverting all the bits gives `0b11111111` (`0xFF`). Add 1 and
+  every digit carries to the next, until the carry exceeds the number of digits,
+  leaving only 0s: `0b00000000` (`0x00`).
+
+But what happens with `-128`? We apply same pattern, of course.
+- `-128` is `0b10000000` (`0x80`). When we invert it, we get `0b01111111`
+  (`0x7F`). To which we add 1, giving `0b10000000` (`0x80`).
+```
+
+````
 
 ### Bytes as light intensity
 

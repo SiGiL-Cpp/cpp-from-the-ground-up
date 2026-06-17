@@ -2,7 +2,7 @@
 
 // Godbolt Compiler Explorer — free, no key, designed for classroom use
 // Compiler ID 'g132' = GCC 13.2. Browse alternatives at godbolt.org/api/compilers/c++
-const GODBOLT_URL  = 'https://godbolt.org/api/compiler/g132/compile';
+const GODBOLT_URL     = 'https://godbolt.org/api/compiler/g132/compile';
 const GODBOLT_HEADERS = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
@@ -26,44 +26,106 @@ function applyTheme(theme) {
 }
 
 function initTheme() {
-  const saved = getCookie('theme');
+  const saved     = getCookie('theme');
   const preferred = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
   applyTheme(saved || preferred);
 }
 
 function toggleTheme() {
   const current = document.documentElement.getAttribute('data-theme') || 'dark';
-  const next = current === 'dark' ? 'light' : 'dark';
+  const next    = current === 'dark' ? 'light' : 'dark';
   setCookie('theme', next);
   applyTheme(next);
 }
 
-// ─── Marked Config ────────────────────────────────────────────────────────────
+// ─── Marked Configuration ─────────────────────────────────────────────────────
 
 marked.use({
   renderer: {
+    // Give every heading an id so #section-name links work
     heading(text, level) {
       const id = text.toLowerCase().replace(/[^\w]+/g, '-');
       return `<h${level} id="${id}">${text}</h${level}>`;
+    },
+
+    // Parse fence info strings:
+    //   ```rec              → default title, not foldable
+    //   ```rec: My Title    → custom title, not foldable
+    //   ```rec> My Title    → custom title, collapsed by default
+    //   ```rec< My Title    → custom title, expanded by default
+    //   ```rec>             → default title, collapsed (no title needed)
+    code(code, infostring) {
+      const info = (infostring || '').trim();
+
+      // Find the first separator: ':', '>', or '<'
+      const candidates = [':', '>', '<']
+        .map(ch => ({ ch, i: info.indexOf(ch) }))
+        .filter(x => x.i !== -1)
+        .sort((a, b) => a.i - b.i);
+
+      const sep   = candidates.length ? candidates[0] : null;
+      const lang  = sep ? info.slice(0, sep.i).trim() : info;
+      const title = sep ? info.slice(sep.i + 1).trim() : '';
+      const fold  = sep && sep.ch !== ':' ? (sep.ch === '>' ? 'closed' : 'open') : null;
+
+      const body = code
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+      const titleAttr = title ? ` data-title="${title.replace(/"/g, '&quot;')}"` : '';
+      const foldAttr  = fold  ? ` data-fold="${fold}"`                            : '';
+
+      return `<pre><code class="language-${lang}"${titleAttr}${foldAttr}>${body}\n</code></pre>`;
     }
   }
 });
 
 // ─── Box Registry ─────────────────────────────────────────────────────────────
 
-const BOX_TYPES = {
-  rec:       (content) => makeBox('rec',       '↩ Recap',      content),
-  important: (content) => makeBox('important', '⚠ Important',  content),
-  trivia:    (content) => makeBox('trivia',    '◎ Trivia',     content),
-  ref:       (content) => makeBox('ref',       '→ References', content),
-  fold:      (content) => makeFold(content),
-  playground:(content) => makePlayground(content),
-  gadget:    (content) => makeGadget(content),
+const BOX_DEFAULTS = {
+  rec:        '↩ Recap',
+  important:  '⚠ Important',
+  trivia:     '◎ Trivia',
+  ref:        '→ References',
+  info:       'ℹ Info',
+  playground: '⌨ Exercise',
+  gadget:     '◈ Interactive',
 };
 
-// ─── Box Constructors ─────────────────────────────────────────────────────────
+const BOX_TYPES = {
+  rec:        (content, title, fold) => makeBox('rec',       title || BOX_DEFAULTS.rec,       content, fold),
+  important:  (content, title, fold) => makeBox('important', title || BOX_DEFAULTS.important,  content, fold),
+  trivia:     (content, title, fold) => makeBox('trivia',    title || BOX_DEFAULTS.trivia,     content, fold),
+  ref:        (content, title, fold) => makeBox('ref',       title || BOX_DEFAULTS.ref,        content, fold),
+  info:       (content, title, fold) => makeBox('info',      title || BOX_DEFAULTS.info,       content, fold),
+  playground: (content, title, fold) => makePlayground(content, title, fold),
+  gadget:     (content, title, fold) => makeGadget(content, title, fold),
+};
 
-function makeBox(type, label, rawContent) {
+// ─── Shared wrap helper ───────────────────────────────────────────────────────
+// Wraps a content element in a plain box <div> or a foldable <details>,
+// preserving the box type's colour and border either way.
+
+function wrapBox(type, label, contentEl, fold) {
+  if (fold) {
+    const details = document.createElement('details');
+    details.className = `box box-${type} box-foldable`;
+    if (fold === 'open') details.open = true;
+
+    const summary = document.createElement('summary');
+    summary.className = 'box-label';
+    const arrow = () => details.open ? '▾ ' : '▸ ';
+    summary.textContent = arrow() + label;
+    details.addEventListener('toggle', () => {
+      summary.textContent = arrow() + label;
+    });
+
+    details.appendChild(summary);
+    details.appendChild(contentEl);
+    return details;
+  }
+
   const el = document.createElement('div');
   el.className = `box box-${type}`;
 
@@ -71,152 +133,123 @@ function makeBox(type, label, rawContent) {
   labelEl.className = 'box-label';
   labelEl.textContent = label;
 
-  const body = document.createElement('div');
-  body.className = 'box-body';
-  body.innerHTML = marked.parse(rawContent.trim());
-
   el.appendChild(labelEl);
-  el.appendChild(body);
+  el.appendChild(contentEl);
   return el;
 }
 
-function makeFold(rawContent) {
-  const details = document.createElement('details');
-  details.className = 'box box-fold';
+// ─── Box Constructors ─────────────────────────────────────────────────────────
 
-  // First line becomes the summary; rest is body
-  const lines = rawContent.trim().split('\n');
-  const summaryText = lines[0].replace(/^#+\s*/, '');
-  const bodyText = lines.slice(1).join('\n').trim();
-
-  const summary = document.createElement('summary');
-  summary.className = 'box-label';
-  summary.textContent = '▸ ' + summaryText;
-
-  details.addEventListener('toggle', () => {
-    summary.textContent = (details.open ? '▾ ' : '▸ ') + summaryText;
-  });
-
+function makeBox(type, label, rawContent, fold) {
   const body = document.createElement('div');
   body.className = 'box-body';
-  if (bodyText) body.innerHTML = marked.parse(bodyText);
-
-  details.appendChild(summary);
-  details.appendChild(body);
-  return details;
+  body.innerHTML = marked.parse(rawContent.trim());
+  mountBoxes(body); // allow nested boxes inside any box (including foldable ones)
+  return wrapBox(type, label, body, fold);
 }
 
-function makePlayground(rawContent) {
-  const config = jsyaml.load(rawContent);
-  const wrapper = document.createElement('div');
-  wrapper.className = 'box box-playground';
-
-  const label = document.createElement('div');
-  label.className = 'box-label';
-  label.textContent = '⌨ Exercise' + (config.id ? ` — ${config.id}` : '');
+function makePlayground(rawContent, title, fold) {
+  const config  = jsyaml.load(rawContent);
+  const label   = title || (BOX_DEFAULTS.playground + (config.id ? ` — ${config.id}` : ''));
+  const content = document.createElement('div');
+  content.className = 'box-playground-content';
 
   const editor = document.createElement('textarea');
-  editor.className = 'playground-editor';
+  editor.className  = 'playground-editor';
   editor.spellcheck = false;
-  editor.value = (config.default_code || '').trimEnd();
+  editor.value      = (config.default_code || '').trimEnd();
 
   const controls = document.createElement('div');
   controls.className = 'playground-controls';
 
   const runBtn = document.createElement('button');
-  runBtn.className = 'playground-run';
+  runBtn.className   = 'playground-run';
   runBtn.textContent = 'Run';
 
   const clearBtn = document.createElement('button');
-  clearBtn.className = 'playground-clear';
+  clearBtn.className   = 'playground-clear';
   clearBtn.textContent = 'Clear output';
 
   controls.appendChild(runBtn);
   controls.appendChild(clearBtn);
 
   const output = document.createElement('div');
-  output.className = 'playground-output';
+  output.className   = 'playground-output';
   output.textContent = '—';
 
-  // SVG display area (hidden until SVG output is detected)
   const svgDisplay = document.createElement('div');
-  svgDisplay.className = 'playground-svg';
+  svgDisplay.className    = 'playground-svg';
   svgDisplay.style.display = 'none';
 
   runBtn.addEventListener('click', async () => {
     output.textContent = 'Compiling…';
-    output.className = 'playground-output';
+    output.className   = 'playground-output';
     svgDisplay.style.display = 'none';
     runBtn.disabled = true;
 
-    const studentCode = editor.value;
     const fullCode = [
       config.boilerplate_before || '',
-      studentCode,
+      editor.value,
       config.boilerplate_after  || '',
     ].join('\n');
 
     try {
-      const res = await fetch(GODBOLT_URL, {
-        method: 'POST',
+      const res  = await fetch(GODBOLT_URL, {
+        method:  'POST',
         headers: GODBOLT_HEADERS,
         body: JSON.stringify({
           source: fullCode,
           options: {
-            userArguments: '-std=c++17',
+            userArguments:   '-std=c++17',
             executeParameters: { args: '', stdin: '' },
-            compilerOptions: { executorRequest: true },
-            filters: { execute: true },
-            tools: [],
-            libraries: [],
+            compilerOptions:   { executorRequest: true },
+            filters:           { execute: true },
+            tools:             [],
+            libraries:         [],
           },
         }),
       });
 
-      const data = await res.json();
-
-      // Godbolt returns execResult when execute:true
+      const data        = await res.json();
       const execResult  = data.execResult || data;
       const buildFailed = execResult.buildResult?.code !== 0;
       const compileErr  = execResult.buildResult?.stderr?.map(l => l.text).join('\n').trim() || '';
       const stdout      = execResult.stdout?.map(l => l.text).join('\n').trim() || '';
-      const stderr      = execResult.stderr?.map(l => l.text).join('\n').trim()  || '';
+      const stderr      = execResult.stderr?.map(l => l.text).join('\n').trim() || '';
 
       if (buildFailed && compileErr) {
         output.textContent = compileErr;
-        output.className = 'playground-output error';
+        output.className   = 'playground-output error';
       } else if (stdout.startsWith('<svg')) {
-        // SVG mode: render frames with scrubber
         renderSVGFrames(svgDisplay, stdout);
         svgDisplay.style.display = 'block';
-        output.style.display = 'none';
+        output.style.display     = 'none';
       } else {
         output.style.display = 'block';
-        output.textContent = stdout + (stderr ? '\n--- stderr ---\n' + stderr : '') || '(no output)';
-        output.className = 'playground-output';
+        output.textContent   = stdout + (stderr ? '\n--- stderr ---\n' + stderr : '') || '(no output)';
+        output.className     = 'playground-output';
       }
     } catch (err) {
       output.textContent = 'Network error: ' + err.message;
-      output.className = 'playground-output error';
+      output.className   = 'playground-output error';
     }
 
     runBtn.disabled = false;
   });
 
   clearBtn.addEventListener('click', () => {
-    output.textContent = '—';
-    output.className = 'playground-output';
-    output.style.display = 'block';
+    output.textContent       = '—';
+    output.className         = 'playground-output';
+    output.style.display     = 'block';
     svgDisplay.style.display = 'none';
-    svgDisplay.innerHTML = '';
+    svgDisplay.innerHTML     = '';
   });
 
-  wrapper.appendChild(label);
-  wrapper.appendChild(editor);
-  wrapper.appendChild(controls);
-  wrapper.appendChild(output);
-  wrapper.appendChild(svgDisplay);
-  return wrapper;
+  content.appendChild(editor);
+  content.appendChild(controls);
+  content.appendChild(output);
+  content.appendChild(svgDisplay);
+  return wrapBox('playground', label, content, fold);
 }
 
 // ─── SVG Frame Scrubber ───────────────────────────────────────────────────────
@@ -225,14 +258,13 @@ function renderSVGFrames(container, rawOutput) {
   container.innerHTML = '';
 
   const DELIMITER = '---FRAME---';
-  const frames = rawOutput.includes(DELIMITER)
+  const frames    = rawOutput.includes(DELIMITER)
     ? rawOutput.split(DELIMITER).map(s => s.trim()).filter(Boolean)
     : [rawOutput];
 
   const display = document.createElement('div');
   display.className = 'svg-display';
   display.innerHTML = frames[0];
-
   container.appendChild(display);
 
   if (frames.length > 1) {
@@ -240,7 +272,7 @@ function renderSVGFrames(container, rawOutput) {
     scrubberWrap.className = 'svg-scrubber';
 
     const label = document.createElement('span');
-    label.className = 'svg-frame-label';
+    label.className   = 'svg-frame-label';
     label.textContent = `Frame 1 / ${frames.length}`;
 
     const slider = document.createElement('input');
@@ -263,35 +295,19 @@ function renderSVGFrames(container, rawOutput) {
 
 // ─── Gadget (iframe) ─────────────────────────────────────────────────────────
 
-function makeGadget(rawContent) {
+function makeGadget(rawContent, title, fold) {
   const config = jsyaml.load(rawContent);
 
-  const wrapper = document.createElement('div');
-  wrapper.className = 'box box-gadget';
-
-  const label = document.createElement('div');
-  label.className = 'box-label';
-  label.textContent = '◈ Interactive';
-
   const iframe = document.createElement('iframe');
-  iframe.src = config.src;
-  iframe.style.cssText = [
-    'width:100%',
-    `height:${config.height || 400}px`,
-    'border:none',
-    'display:block',
-  ].join(';');
+  iframe.src           = config.src;
+  iframe.style.cssText = ['width:100%', `height:${config.height || 400}px`, 'border:none', 'display:block'].join(';');
 
-  // Resize iframe to fit content if the gadget posts its height
   window.addEventListener('message', (e) => {
-    if (e.data?.type === 'gadget-height' && e.data.src === config.src) {
+    if (e.data?.type === 'gadget-height' && e.data.src === config.src)
       iframe.style.height = e.data.height + 'px';
-    }
   });
 
-  wrapper.appendChild(label);
-  wrapper.appendChild(iframe);
-  return wrapper;
+  return wrapBox('gadget', title || BOX_DEFAULTS.gadget, iframe, fold);
 }
 
 // ─── Markdown Post-Processor ──────────────────────────────────────────────────
@@ -301,8 +317,10 @@ function mountBoxes(root) {
     const lang = code.className.replace('language-', '');
     if (!BOX_TYPES[lang]) return;
 
-    const pre = code.parentElement; // marked wraps in <pre>
-    const box = BOX_TYPES[lang](code.textContent);
+    const title = code.dataset.title || null;
+    const fold  = code.dataset.fold  || null;
+    const pre   = code.parentElement;
+    const box   = BOX_TYPES[lang](code.textContent, title, fold);
     pre.replaceWith(box);
   });
 }
@@ -321,7 +339,7 @@ function buildShell() {
 
 async function loadPage(mdPath) {
   buildShell();
-  initTheme();
+  initTheme(); // must run after buildShell so the toggle button exists
   const root = document.getElementById('lesson-root');
 
   try {
@@ -336,7 +354,7 @@ async function loadPage(mdPath) {
   }
 }
 
-// Resolve ?lesson= param, e.g. ?lesson=01-types → lessons/01-types.md
+// Resolve ?page= param: ?page=01-data → pages/01-data.md
 function pageFromURL(fallback) {
   const param = new URLSearchParams(window.location.search).get('page');
   return param ? `pages/${param}.md` : fallback;

@@ -1,3 +1,9 @@
+---
+title: "01 — Data"
+prev: null
+next: "02-arrays"
+---
+
 # 01 - Data
 
 At the core, a computer is a glorified calculator. It manipulates numbers. This
@@ -585,6 +591,14 @@ width and height, they will be the same for each sequence), or interleave them,
 with a Byte for the Red, followed by a Byte for the Green, followed by a Byte
 for the Blue, and finally a Byte for the transparency. This is often referred to
 as RGBA.
+```
+
+Let's play with this. Below is a grid of raw Byte values, you can change them
+and update the corresponding image.
+
+```gadget
+src: gadgets/image-lens.html
+height: 700
 ```
 
 ### > Sound

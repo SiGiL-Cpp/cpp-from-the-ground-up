@@ -422,44 +422,6 @@ function buildShell() {
   `;
 }
 
-// Splits leading YAML front-matter (between --- fences) from the rest of the
-// markdown body. Returns { meta, body }. meta is {} if no front-matter found.
-function parseFrontMatter(text) {
-  const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
-  if (!match) return { meta: {}, body: text };
-
-  let meta = {};
-  try {
-    meta = jsyaml.load(match[1]) || {};
-  } catch (err) {
-    console.warn('Front-matter parse error:', err);
-  }
-
-  return { meta, body: text.slice(match[0].length) };
-}
-
-// Derives a page id (e.g. "01-data") from a path like "pages/01-data.md"
-function pageIdFromPath(path) {
-  const file = path.split('/').pop();
-  return file.replace(/\.md$/, '');
-}
-
-function buildPageNav(meta) {
-  const nav = document.createElement('nav');
-  nav.className = 'page-nav';
-
-  const prevEl = meta.prev
-    ? `<a href="?page=${meta.prev}" class="page-nav-link page-nav-prev">‹ Previous</a>`
-    : `<span class="page-nav-link page-nav-disabled">‹ Previous</span>`;
-
-  const nextEl = meta.next
-    ? `<a href="?page=${meta.next}" class="page-nav-link page-nav-next">Next ›</a>`
-    : `<span class="page-nav-link page-nav-disabled">Next ›</span>`;
-
-  nav.innerHTML = prevEl + nextEl;
-  return nav;
-}
-
 async function loadPage(mdPath) {
   buildShell();
   initTheme(); // must run after buildShell so the toggle button exists
@@ -468,15 +430,11 @@ async function loadPage(mdPath) {
   try {
     const res  = await fetch(mdPath);
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-    const raw  = await res.text();
-    const { meta, body } = parseFrontMatter(raw);
+    const text = await res.text();
 
-    if (meta.title) document.title = meta.title;
-
-    root.innerHTML = `<article class="lesson">${marked.parse(body)}</article>`;
+    root.innerHTML = `<article class="lesson">${marked.parse(text)}</article>`;
     mountBoxes(root);
     mountFoldingSections(root);
-    root.appendChild(buildPageNav(meta));
   } catch (err) {
     root.innerHTML = `<p class="load-error">Could not load page: ${err.message}</p>`;
   }

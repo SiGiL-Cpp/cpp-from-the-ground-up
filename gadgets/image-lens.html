@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image lens</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0f1117;
+      --surface:  #181c26;
+      --border:   #2a2f3d;
+      --text:     #cdd4e0;
+      --muted:    #5a6580;
+      --mono:     'IBM Plex Mono', 'Fira Mono', monospace;
+      --sans:     'IBM Plex Sans', system-ui, sans-serif;
+      --blue-bg:  #1a2a4a;
+      --blue-fg:  #aaccff;
+      --blue-brd: #2a4a8a;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root:not([data-theme]) {
+        --bg:       #f5f4f0;
+        --surface:  #eeedea;
+        --border:   #d0cdc8;
+        --text:     #1e1c1a;
+        --muted:    #888480;
+        --blue-bg:  #dce8ff;
+        --blue-fg:  #1a3aaa;
+        --blue-brd: #85b7eb;
+      }
+    }
+
+    :root[data-theme="light"] {
+      --bg:       #f5f4f0;
+      --surface:  #eeedea;
+      --border:   #d0cdc8;
+      --text:     #1e1c1a;
+      --muted:    #888480;
+      --blue-bg:  #dce8ff;
+      --blue-fg:  #1a3aaa;
+      --blue-brd: #85b7eb;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      padding: 1rem 1.25rem 1.25rem;
+      line-height: 1.5;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .lbl {
+      font-size: 12px;
+      color: var(--muted);
+      width: 90px;
+      flex-shrink: 0;
+      text-align: right;
+    }
+
+    input[type=number], select {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 0.3rem 0.5rem;
+      outline: none;
+    }
+
+    input[type=number] { width: 70px; }
+    input[type=number]:focus, select:focus { border-color: var(--blue-fg); }
+    select { cursor: pointer; }
+
+    button {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 0.35rem 0.7rem;
+      cursor: pointer;
+    }
+
+    button:hover { border-color: var(--blue-fg); }
+
+    .divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+    .canvas-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 1rem 0;
+      padding: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    #imgCanvas {
+      image-rendering: pixelated;
+      border: 1px solid var(--border);
+      max-width: 100%;
+    }
+
+    .grid-wrap {
+      max-height: 260px;
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      padding: 8px;
+    }
+
+    .byte-grid {
+      display: grid;
+      gap: 3px;
+    }
+
+    .byte-cell {
+      width: 30px;
+      height: 22px;
+      font-family: var(--mono);
+      font-size: 10px;
+      text-align: center;
+      color: var(--text);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0;
+      outline: none;
+    }
+
+    .byte-cell:focus { border-color: var(--blue-fg); }
+
+    .channel-group {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 6px;
+      align-items: center;
+    }
+
+    .channel-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      width: 16px;
+    }
+
+    .note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .seq-preview {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      word-break: break-all;
+      max-height: 4.5em;
+      overflow-y: auto;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 6px 8px;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2 style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">
+    Image lens — edit a byte sequence and see it rendered as a grayscale or colour image
+  </h2>
+
+  <div class="row">
+    <span class="lbl">mode</span>
+    <select id="mode">
+      <option value="gray">grayscale — 1 byte per pixel</option>
+      <option value="rgb">colour (RGB) — 3 bytes per pixel</option>
+      <option value="rgba">colour + alpha (RGBA) — 4 bytes per pixel</option>
+    </select>
+  </div>
+
+  <div class="row">
+    <span class="lbl">width</span>
+    <input type="number" id="width" value="11" min="1" max="24" />
+    <span class="lbl" style="width:auto;">height</span>
+    <input type="number" id="height" value="8" min="1" max="24" />
+    <button id="resizeBtn">Apply size</button>
+  </div>
+
+  <div class="row">
+    <span class="lbl">preset</span>
+    <select id="preset">
+      <option value="invader-gray">Invader (grayscale, 11×8)</option>
+      <option value="invader-rgb">Invader (colour, 11×8)</option>
+      <option value="random">Random noise</option>
+      <option value="zero">All zero (black)</option>
+    </select>
+    <button id="loadPresetBtn">Load preset</button>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="canvas-wrap">
+    <canvas id="imgCanvas"></canvas>
+  </div>
+
+  <div class="row" style="margin-bottom:6px;">
+    <span class="lbl" style="padding-top:2px;">byte values</span>
+    <span class="note" id="byteCount" style="margin-top:0;"></span>
+  </div>
+  <div class="grid-wrap" id="gridWrap"></div>
+
+  <div class="note" id="seqNote"></div>
+  <div class="seq-preview" id="seqPreview"></div>
+
+  <script>
+    // Theme: read from ?theme= on load, update live if the parent page toggles it.
+    (function () {
+      const param = new URLSearchParams(window.location.search).get('theme');
+      if (param === 'light' || param === 'dark') {
+        document.documentElement.setAttribute('data-theme', param);
+      }
+    })();
+
+    window.addEventListener('message', (e) => {
+      if (e.data?.type === 'set-theme') {
+        document.documentElement.setAttribute('data-theme', e.data.theme);
+        render();
+      }
+    });
+
+    const modeSel    = document.getElementById('mode');
+    const widthInp   = document.getElementById('width');
+    const heightInp  = document.getElementById('height');
+    const resizeBtn  = document.getElementById('resizeBtn');
+    const presetSel  = document.getElementById('preset');
+    const loadBtn    = document.getElementById('loadPresetBtn');
+    const gridWrap   = document.getElementById('gridWrap');
+    const byteCount  = document.getElementById('byteCount');
+    const seqNote    = document.getElementById('seqNote');
+    const seqPreview = document.getElementById('seqPreview');
+    const canvas     = document.getElementById('imgCanvas');
+    const ctx        = canvas.getContext('2d');
+
+    const CHANNELS = { gray: 1, rgb: 3, rgba: 4 };
+
+    // A small 11x8 invader bitmap (1 = filled) used to seed presets
+    const INVADER_IMG = [
+      [  0,   0, 255,   0,   0,   0,   0,   0, 255,   0,   0],
+      [  0,   0,   0, 255,   0,   0,   0, 255,   0,   0,   0],
+      [  0,   0, 255, 255, 255, 255, 255, 255, 255,   0,   0],
+      [  0, 255, 255, 128, 255, 255, 255, 128, 255, 255,   0],
+      [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255],
+      [255,   0, 255, 255, 255, 255, 255, 255, 255,   0, 255],
+      [255,   0, 255,   0,   0,   0,   0,   0, 255,   0, 255],
+      [  0,   0,   0, 255, 255,   0, 255, 255,   0,   0,   0],
+    ];
+
+    const INVADER_R = [
+      [  0,   0,  50,   0,   0,   0,   0,   0,  50,   0,   0],
+      [  0,   0,   0,  50,   0,   0,   0,  50,   0,   0,   0],
+      [  0,   0,  50,  50,  50,  50,  50,  50,  50,   0,   0],
+      [  0,  50,  50, 255,  50,  50,  50, 255,  50,  50,   0],
+      [ 50,  50,  50,  50,  50,  50,  50,  50,  50,  50,  50],
+      [ 50,   0,  50,  50,  50,  50,  50,  50,  50,   0,  50],
+      [ 50,   0,  50,   0,   0,   0,   0,   0,  50,   0,  50],
+      [  0,   0,   0,  50,  50,   0,  50,  50,   0,   0,   0],
+    ];
+    const INVADER_G = [
+      [  0,   0,  75,   0,   0,   0,   0,   0,  75,   0,   0],
+      [  0,   0,   0,  75,   0,   0,   0,  75,   0,   0,   0],
+      [  0,   0,  75,  75,  75,  75,  75,  75,  75,   0,   0],
+      [  0,  75,  75,   0,  75,  75,  75,   0,  75,  75,   0],
+      [ 75,  75,  75,  75,  75,  75,  75,  75,  75,  75,  75],
+      [ 75,   0,  75,  75,  75,  75,  75,  75,  75,   0,  75],
+      [ 75,   0,  75,   0,   0,   0,   0,   0,  75,   0,  75],
+      [  0,   0,   0,  75,  75,   0,  75,  75,   0,   0,   0],
+    ];
+    const INVADER_B = [
+      [  0,   0, 200,   0,   0,   0,   0,   0, 200,   0,   0],
+      [  0,   0,   0, 200,   0,   0,   0, 200,   0,   0,   0],
+      [  0,   0, 200, 200, 200, 200, 200, 200, 200,   0,   0],
+      [  0, 200, 200,   0, 200, 200, 200,   0, 200, 200,   0],
+      [200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200],
+      [200,   0, 200, 200, 200, 200, 200, 200, 200,   0, 200],
+      [200,   0, 200,   0,   0,   0,   0,   0, 200,   0, 200],
+      [  0,   0,   0, 200, 200,   0, 200, 200,   0,   0,   0],
+    ];
+    const INVADER_A = [
+      [  0,   0, 255,   0,   0,   0,   0,   0, 255,   0,   0],
+      [  0,   0,   0, 255,   0,   0,   0, 255,   0,   0,   0],
+      [  0,   0, 255, 255, 255, 255, 255, 255, 255,   0,   0],
+      [  0, 255, 255, 128, 255, 255, 255, 128, 255, 255,   0],
+      [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255],
+      [255,   0, 255, 255, 255, 255, 255, 255, 255,   0, 255],
+      [255,   0, 255,   0,   0,   0,   0,   0, 255,   0, 255],
+      [  0,   0,   0, 255, 255,   0, 255, 255,   0,   0,   0],
+    ];
+
+    let width  = parseInt(widthInp.value, 10);
+    let height = parseInt(heightInp.value, 10);
+    let mode   = modeSel.value;
+    let bytes  = []; // flat array, length = width * height * CHANNELS[mode]
+
+    function channelsFor(m) { return CHANNELS[m]; }
+
+    function emptyBytes(w, h, m) {
+      return new Array(w * h * channelsFor(m)).fill(0);
+    }
+
+    function clampByte(v) {
+      v = Math.round(Number(v));
+      if (isNaN(v)) return 0;
+      return Math.max(0, Math.min(255, v));
+    }
+
+    function buildGrid() {
+      gridWrap.innerHTML = '';
+      const ch = channelsFor(mode);
+      const channelNames = ch === 1 ? ['']
+        : ch === 3 ? ['R', 'G', 'B']
+        : ['R', 'G', 'B', 'A'];
+
+      for (let c = 0; c < ch; c++) {
+        const group = document.createElement('div');
+        group.className = 'channel-group';
+        group.style.flexDirection = 'column';
+        group.style.alignItems = 'stretch';
+
+        if (channelNames[c]) {
+          const lab = document.createElement('div');
+          lab.className = 'channel-label';
+          lab.style.width = 'auto';
+          lab.textContent = channelNames[c] + ' channel';
+          group.appendChild(lab);
+        }
+
+        const grid = document.createElement('div');
+        grid.className = 'byte-grid';
+        grid.style.gridTemplateColumns = `repeat(${width}, 30px)`;
+
+        for (let y = 0; y < height; y++) {
+          for (let x = 0; x < width; x++) {
+            const idx = (y * width + x) * ch + c;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'byte-cell';
+            input.value = bytes[idx];
+            input.dataset.idx = idx;
+            input.addEventListener('change', () => {
+              bytes[idx] = clampByte(input.value);
+              input.value = bytes[idx];
+              render();
+            });
+            grid.appendChild(input);
+          }
+        }
+
+        group.appendChild(grid);
+        gridWrap.appendChild(group);
+      }
+    }
+
+    function render() {
+      const ch = channelsFor(mode);
+      const scale = 18;
+      canvas.width  = width * scale;
+      canvas.height = height * scale;
+
+      const imgData = ctx.createImageData(width, height);
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const srcIdx = (y * width + x) * ch;
+          const dstIdx = (y * width + x) * 4;
+          if (mode === 'gray') {
+            const g = bytes[srcIdx];
+            imgData.data[dstIdx]     = g;
+            imgData.data[dstIdx + 1] = g;
+            imgData.data[dstIdx + 2] = g;
+            imgData.data[dstIdx + 3] = 255;
+          } else if (mode === 'rgb') {
+            imgData.data[dstIdx]     = bytes[srcIdx];
+            imgData.data[dstIdx + 1] = bytes[srcIdx + 1];
+            imgData.data[dstIdx + 2] = bytes[srcIdx + 2];
+            imgData.data[dstIdx + 3] = 255;
+          } else {
+            imgData.data[dstIdx]     = bytes[srcIdx];
+            imgData.data[dstIdx + 1] = bytes[srcIdx + 1];
+            imgData.data[dstIdx + 2] = bytes[srcIdx + 2];
+            imgData.data[dstIdx + 3] = bytes[srcIdx + 3];
+          }
+        }
+      }
+
+      // Draw at native size to a temp canvas, then scale up with pixelated rendering
+      const tmp = document.createElement('canvas');
+      tmp.width = width;
+      tmp.height = height;
+      tmp.getContext('2d').putImageData(imgData, 0, 0);
+      ctx.imageSmoothingEnabled = false;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(tmp, 0, 0, canvas.width, canvas.height);
+
+      byteCount.textContent = `${bytes.length} bytes (${width} × ${height} × ${ch})`;
+      seqNote.textContent = 'The raw byte sequence, in order, as it would appear in memory:';
+      seqPreview.textContent = bytes.join(', ');
+
+      reportHeight();
+    }
+
+    function reportHeight() {
+      window.parent.postMessage({
+        type: 'gadget-height',
+        src: window.location.pathname,
+        height: document.body.scrollHeight
+      }, '*');
+    }
+
+    function applySize() {
+      const newW = Math.max(1, Math.min(24, parseInt(widthInp.value, 10) || 1));
+      const newH = Math.max(1, Math.min(24, parseInt(heightInp.value, 10) || 1));
+      width = newW;
+      height = newH;
+      widthInp.value = width;
+      heightInp.value = height;
+      bytes = emptyBytes(width, height, mode);
+      buildGrid();
+      render();
+    }
+
+    function loadPreset(name) {
+      const ch = channelsFor(mode);
+
+      if (name === 'random') {
+        bytes = bytes.map(() => Math.floor(Math.random() * 256));
+        buildGrid();
+        render();
+        return;
+      }
+
+      if (name === 'zero') {
+        bytes = emptyBytes(width, height, mode);
+        buildGrid();
+        render();
+        return;
+      }
+
+      // Invader presets assume the canonical 11x8 size
+      width = 11;
+      height = 8;
+      widthInp.value = width;
+      heightInp.value = height;
+
+      if (name === 'invader-gray') {
+        modeSel.value = 'gray';
+        mode = 'gray';
+        bytes = [];
+        for (let y = 0; y < 8; y++) {
+          for (let x = 0; x < 11; x++) {
+            bytes.push(INVADER_IMG[y][x]);
+          }
+        }
+      } else if (name === 'invader-rgb') {
+        modeSel.value = 'rgb';
+        mode = 'rgb';
+        bytes = [];
+        for (let y = 0; y < 8; y++) {
+          for (let x = 0; x < 11; x++) {
+            bytes.push(INVADER_R[y][x], INVADER_G[y][x], INVADER_B[y][x]);
+          }
+        }
+      }
+
+      buildGrid();
+      render();
+    }
+
+    modeSel.addEventListener('change', () => {
+      mode = modeSel.value;
+      bytes = emptyBytes(width, height, mode);
+      buildGrid();
+      render();
+    });
+
+    resizeBtn.addEventListener('click', applySize);
+    loadBtn.addEventListener('click', () => loadPreset(presetSel.value));
+
+    // Initial state: load the grayscale invader so there's something to look at immediately
+    bytes = emptyBytes(width, height, mode);
+    loadPreset('invader-gray');
+  </script>
+</body>
+</html>

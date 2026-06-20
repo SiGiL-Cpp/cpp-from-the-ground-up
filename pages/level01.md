@@ -279,7 +279,7 @@ out that it reads as `-93` as a [Signed Byte](#signed-bytes). If we consider it
 made of 8<sup>th</sup>, we have -93/8 = `-11.625`. 
 ```
 
-#### > Byte as floating point
+#### > Byte as floating point...
 
 The floating-point representation will make more sense later on, but I wanted to
 introduce it here, as it is heavily used in all kind of applications, and more
@@ -442,7 +442,7 @@ together two of those, we get a 4-digit number which can represent 10.000 values
 (0..9999).
 
 In the same way, if we stack two Bytes together, we don't just double the number
-of possible values, we multiply them, giving `65.536` possible values.
+of possible values, we multiply them, giving `65,536` possible values.
 
 We will come back to values encoded over two Bytes a bit later, especially when
 we look at audio formats.
@@ -451,11 +451,11 @@ we look at audio formats.
 
 A Word in computing, used to refer to the "default" or "natural" size of the
 data for a specific architecture. So a Word is not a specific, set number of
-Bytes. The default size of a unit of data grew over time, and is often
+Bytes. The default size of a unit of data grew over time, and is often, 
 currently, either 4 Bytes (32 bits) or 8 Bytes (64 bits) for the most common
 architectures.
 
-```trivia < The word `Word` is ambiguous
+```trivia> The word "Word" is ambiguous...
 The x86 architecture used, a long time ago, a Word that was 2 Bytes long. When
 they later doubled that, evolving the architecture to use 4-Byte-long values as
 the natural "default", they decided to keep their old definition of Word as a
@@ -467,65 +467,144 @@ will prefer starting to call the types by their number of bits (a bit is a
 binary digit, there are 8 bits in a Byte). 
 ```
 
+### What does that change?
 
+- For the unsigned integral numbers, the range of representable numbers grows
+  (a lot).
+  - [0, 4,294,967,295] with 4 Bytes (32 bits).
+  - [0, 18,446,744,073,709,551,615] with 8 Bytes (64 bits). (Yes, that's 18 Quintillions.)
+- For signed integral,
+  - [-2,147,483,648, 2,147,483,647] with 4 Bytes (32 bits),
+  - [-9,223,372,036,854,775,808, 9,223,372,036,854,775,807] with 8 Bytes (64 bits).
+- For booleans,
+  - nothing changes in their basic interpretation.
+  - Interpreted as several booleans, they can now represent 32 or 64 boolean values at once.
+- Characters are usually represented with smaller values, over one or two Bytes only.
+- A fixed-point number over 4 Bytes (32 bit) can represent values up
+  to 20,000 with a 0.000,01 (10<sup>-5</sup>) precision. That's enough to
+  measure half the perimeter of the Earth in kilometers while retaining a
+  precision at the centimeter.
+- Floating-point values also benefit a lot from the additional Bytes.
+  - A 32-bit (4 Byte) float can hold 8,388,608 different values per exponent
+    band (where our 8-bit representation could only hold 8).
+  - It can represent the value 2<sup>-149</sup> which is roughly 1.4&times;10<sup>-45</sup>.
+  - It can also represent a value that is about 2.43&times;10<sup>73</sup>.
+  - A 64-bit (8 Byte) floating-point number has 4,503,599,627,370,496 values
+    per exponent band.
+  - It can hold values as small as about 4.94&times;10<sup>-324</sup> and as
+    large as about 1.8&times;10<sup>308</sup>.
+  - But remember, with floating-point values, the precision scales with the number.
+    - For a 32 bit float (4 Bytes), around 10,000,000, the precision is down to
+      1 (10,000,001 is representable, but not 10.000.000,5).
+    - With 64 bits (8 Bytes), around 10,000,000, the precision remains much
+      higher at about 1.86&times;10<sup>-9</sup> (that's roughly 10 nanometer
+      precision over the circumference of the Earth).
 
+That's a lot of numbers to play with. Mostly, enough for our purpose. But one
+reasons we want such enormous ranges of numbers is also that we need room for
+calculations. Sometimes we will square, cube, or take an even higher power of a
+number. That makes for large values we need to be able to work with.
 
+## Even more Bytes
 
-Why stop with only two Bytes stacked? A `Word`is the "default" or "natural" data size of a given computer architecture. These days, it is usually either 4 Bytes (32 bits) or 8 Bytes (64 bits).
+Eventually, we'll want to express more than just characters or a light
+intensity. We will want to express text and images.
 
---------
+### Text
 
+If we keep to our [ASCII](#bytes-as-characters) representation where a single
+Byte is a character, a text is simple: it is many Bytes, one after the other,
+each representing a different character.
 
+In C++, to make it clear where such a sequence of characters ends, we require
+that it ends with a special character: the "null character", sometimes noted
+'`\0`' (which has the value `0`).
 
-This is the prose body of the lesson. Write freely in standard markdown.
-You can use **bold**, `inline code`, and so on.
-
-```rec
-This is a recap box. Use it to restate the key takeaway of a section in one or two sentences.
+```rec: Example
+So `76`, `105`, `107`, `101`, `32`, `116`, `104`, `97`, `116`, `46`, `0` can
+represent the words: "Like that.", complete with a null character at the end.
 ```
 
-```important
-This is an important highlight. Use it for things students must not skim past — a trap, a rule, a constraint.
+### Image
+
+In a similar way, a sequence of numbers, of Bytes, can be interpreted as an
+image. But for an image, we want to keep the value `0` for "completely black",
+we we can't use the same trick as the text to know when to stop.
+
+In addition, our image is 2D, it has a width and a height. We will need to know
+that if we want to display it properly.
+
+One solution would be to store these two values, as plain integral numbers.
+
+For instance, a [Word](#a-different-kind-of-word) for the Width of the image,
+another Word for its height, and then we know that the picture will be made of
+*width*&times;*height* light intensity values, so we know how many Byte
+light-intensity value we expect next.
+
+```rec: Example
+Suppose we have an image that is 11 pixels wide, and 8 pixels high.
+We could write this:
+- `11` (our width)
+- `8` (our height)
+- `0`, `0`, `255`, `0`, `0`, `0`, `0`, `0`, `255`, `0`, `0`
+- `0`, `0`, `0`, `255`, `0`, `0`, `0`, `255`, `0`, `0`, `0`
+- `0`, `0`, `255`, `255`, `255`, `255`, `255`, `255`, `255`, `0`, `0`
+- `0`, `255`, `255`, `128`, `255`, `255`, `255`, `128`, `255`, `255`, `0`
+- `255`, `255`, `255`, `255`, `255`, `255`, `255`, `255`, `255`, `255`, `255`
+- `255`, `0`, `255`, `255`, `255`, `255`, `255`, `255`, `255`, `0`, `255`
+- `255`, `0`, `255`, `0`, `0`, `0`, `0`, `0`, `255`, `0`, `255`
+- `0`, `0`, `0`, `255`, `255`, `0`, `255`, `255`, `0`, `0`, `0`
+
+If our Word size is 4 Bytes (32-bit architecture), that would be 96 Bytes that
+we can interpret as an image.
 ```
 
-Here's some more prose between boxes. The layout handles spacing automatically.
+```trivia> Colour Images
+If we wanted to display a colour image, we could use more Byte values.
 
-```trivia
-This is a trivia box. Use it for interesting-but-not-essential context: history, etymology, platform quirks.
+Since the human eye can usually detect only 3 distinct elementary colours at
+best (colour-blind people might perceive less, and tetrachromat people have a
+4<sup>th</sup> one), screen technologies emit 3 distinct colours that we blend
+to generate all the colours most people will be able to perceive.
+
+These colours are Red, Green, and Blue. When emitting the 3 together (in the
+correct blend), the eye perceives it as white.
+
+So instead of having one picture expressing a light intensity, which would
+result in a greyscale image, we can have 3 such images:
+- One for the Red light intensity,
+- One for the Green light intensity,
+- One for the Blue light intensity.
+
+If we want to be able to express a transparency for our image, we can add a
+fourth sequence of Bytes, representing that transparency (usually 0 for
+transparent and 255 for opaque).
+
+We can either keep these sequences one after the other (no need to repeat the
+width and height, they will be the same for each sequence), or interleave them,
+with a Byte for the Red, followed by a Byte for the Green, followed by a Byte
+for the Blue, and finally a Byte for the transparency. This is often referred to
+as RGBA.
 ```
 
-```ref
-[cppreference — Fundamental types](https://en.cppreference.com/w/cpp/language/types)
+### > Sound
 
-Use ref boxes for curated external links. One link per box keeps it scannable.
-```
+A sequence of values can also express sound. A speaker is essentially a system
+where electricity is converted into a magnetic field, which in turn pushes or
+pulls a magnet attached to a membrane. The movement of this membrane sets the
+surrounding air in motion, and if it makes it vibrate somewhere between 20 times
+per second and 20,000 times per seconds, that's sound.
 
-```fold
-#### What happens if you ask a deeper question?
+So a series of values (a single Byte each, or often, two-Byte (16 bits) each)
+can represent exactly this movement.
 
-This is a fold box. It is collapsed by default. Use it for:
-- Answers to hypothetical questions raised in the prose
-- Deeper dives that would break the flow
-- Exercise answers the student should try before reading
-```
+There has been several format over time. In some old format, we use an unsigned
+8-bit value. `0` means pulling the mambrane as far as it goes, and `255` pushing it
+as far as it goes the other way.
 
-And here is a playground box. The student only writes the body of `solve()`.
-The boilerplate (includes, main, helper classes) is hidden.
+Modern formats usually use signed values, often over 16 bits (2 Bytes), with a
+clearer `0` means leaving the membrane at rest.
 
-```playground
-id: stub-ex1
-boilerplate_before: |
-  #include <iostream>
-  #include <string>
-
-  void solve() {
-boilerplate_after: |
-  }
-
-  int main() {
-    solve();
-    return 0;
-  }
-default_code: |
-  std::cout << "Hello, types!" << std::endl;
-```
+Worth noting that outputting random values to a speaker can damage it. The
+membrane is built to oscillate at specific frequencies with specific
+intensities. Please be careful if you play with that.

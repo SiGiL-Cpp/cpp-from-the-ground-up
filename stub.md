@@ -92,3 +92,23 @@ This info box is collapsed and contains a nested box:
 Nested boxes work inside any foldable box.
 ```
 ````
+
+## > A collapsed section
+
+This whole section, including its prose, boxes, and sub-headings, is hidden until the reader expands it.
+
+```rec
+Boxes inside a folded section work exactly as normal.
+```
+
+### A nested subsection
+
+Sub-headings inside a folded section are part of its content and fold along with it.
+
+## < An expanded section
+
+This section starts open (the `<` marker) but can still be collapsed by the reader.
+
+### > A nested foldable subsection
+
+This h3 is itself foldable, independent of its parent h2's fold state.

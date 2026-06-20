@@ -92,6 +92,41 @@ body {
   scroll-margin-top: 4rem;
 }
 
+/* ─── Foldable sections (## > / ## <) ──────────────────────────────────────── */
+
+.section-fold { margin: 2.25rem 0; scroll-margin-top: 4rem; }
+
+.section-fold-summary {
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  font-weight: 600;
+  color: #c8d4f0;
+}
+
+.section-fold-summary::-webkit-details-marker { display: none; }
+.section-fold-summary:hover { color: #eef2ff; }
+
+.section-fold-h2 > .section-fold-summary {
+  font-size: 1.4rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border);
+  color: #eef2ff;
+}
+
+.section-fold-h3 > .section-fold-summary {
+  font-size: 1.1rem;
+  display: inline-block;
+  border-bottom: 1px solid #4a5878;
+  padding-bottom: 0.2rem;
+}
+
+.section-fold-h2 { margin: 3.5rem 0 0.75rem; }
+.section-fold-h3 { margin: 2.25rem 0 0.5rem; }
+
+.section-fold-body { margin-top: 1rem; }
+.section-fold-body > *:first-child { margin-top: 0; }
+
 .lesson p { margin-bottom: 1.1rem; }
 
 .lesson a { color: var(--play-label); text-decoration: none; border-bottom: 1px solid #2a3560; }
@@ -161,25 +196,25 @@ body {
 
 /* ─── Box Variants ─────────────────────────────────────────────────────────── */
 
-.box-rec         { background: var(--rec);  border-color: var(--rec-border); }
+.box-rec       { background: var(--rec);  border-color: var(--rec-border); }
 .box-rec       > .box-label { color: var(--rec-label);  background: #162e22; }
 
-.box-important   { background: var(--imp);  border-color: var(--imp-border); }
+.box-important { background: var(--imp);  border-color: var(--imp-border); }
 .box-important > .box-label { color: var(--imp-label);  background: #2e1812; }
 
-.box-trivia      { background: var(--tri);  border-color: var(--tri-border); }
+.box-trivia    { background: var(--tri);  border-color: var(--tri-border); }
 .box-trivia    > .box-label { color: var(--tri-label);  background: #14202e; }
 
-.box-ref         { background: var(--ref);  border-color: var(--ref-border); }
+.box-ref       { background: var(--ref);  border-color: var(--ref-border); }
 .box-ref       > .box-label { color: var(--ref-label);  background: #1e1e14; }
 
-.box-info        { background: var(--info); border-color: var(--info-border); }
+.box-info      { background: var(--info); border-color: var(--info-border); }
 .box-info      > .box-label { color: var(--info-label); background: #18182a; }
 
-.box-playground   { background: var(--play); border-color: var(--play-border); }
+.box-playground { background: var(--play); border-color: var(--play-border); }
 .box-playground > .box-label { color: var(--play-label); background: #0e1428; }
 
-.box-gadget      { background: var(--play); border-color: var(--play-border); }
+.box-gadget    { background: var(--play); border-color: var(--play-border); }
 .box-gadget    > .box-label { color: var(--play-label); background: #0e1428; }
 
 /* ─── Foldable boxes ───────────────────────────────────────────────────────── */
@@ -405,6 +440,10 @@ body {
 [data-theme="light"] .lesson h1    { color: #111; border-color: var(--border); }
 [data-theme="light"] .lesson h2    { color: #1a1a2e; border-color: var(--border); }
 [data-theme="light"] .lesson h3    { color: #2a3a6a; border-color: #9aa8c8; }
+[data-theme="light"] .section-fold-summary               { color: #2a3a6a; }
+[data-theme="light"] .section-fold-summary:hover          { color: #1a1a2e; }
+[data-theme="light"] .section-fold-h2 > .section-fold-summary { color: #1a1a2e; border-color: var(--border); }
+[data-theme="light"] .section-fold-h3 > .section-fold-summary { border-color: #9aa8c8; }
 [data-theme="light"] .lesson code  { color: #2a4a8a; background: var(--code-bg); }
 [data-theme="light"] .lesson pre   { background: var(--code-bg); }
 [data-theme="light"] .lesson pre code  { color: #2a4060; }

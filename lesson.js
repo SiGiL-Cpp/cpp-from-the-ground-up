@@ -42,10 +42,26 @@ function toggleTheme() {
 
 marked.use({
   renderer: {
-    // Give every heading an id so #section-name links work
+    // Headings starting with '>' or '<' become foldable sections:
+    //   ## > Collapsed section title
+    //   ## < Section that starts expanded
     heading(text, level) {
-      const id = text.toLowerCase().replace(/[^\w]+/g, '-');
-      return `<h${level} id="${id}">${text}</h${level}>`;
+      let fold = null;
+      let clean = text;
+
+      if (/^(&gt;|>)\s*/.test(text)) {
+        fold = 'closed';
+        clean = text.replace(/^(&gt;|>)\s*/, '');
+      } else if (/^(&lt;|<)\s*/.test(text)) {
+        fold = 'open';
+        clean = text.replace(/^(&lt;|<)\s*/, '');
+      }
+
+      // id should be based on plain text, so strip any remaining tags/entities for slugging
+      const plain = clean.replace(/<[^>]*>/g, '').replace(/&[a-z]+;/gi, '');
+      const id = plain.toLowerCase().replace(/[^\w]+/g, '-');
+      const foldAttr = fold ? ` data-fold="${fold}"` : '';
+      return `<h${level} id="${id}"${foldAttr}>${clean}</h${level}>`;
     },
 
     // Parse fence info strings:
@@ -325,6 +341,60 @@ function mountBoxes(root) {
   });
 }
 
+// Wraps foldable headings (## > Title / ## < Title) and everything until the
+// next heading of the same or higher level into a <details> section.
+// Processes deeper levels first (h3 before h2) so nesting falls out naturally.
+function mountFoldingSections(root) {
+  const isHeading = (el, maxLevel) => {
+    if (!el.tagName || el.tagName[0] !== 'H') return false;
+    const lvl = parseInt(el.tagName[1]);
+    return !isNaN(lvl) && lvl <= maxLevel;
+  };
+
+  ['h3', 'h2'].forEach(tag => {
+    const level = parseInt(tag[1]);
+    root.querySelectorAll(`${tag}[data-fold]`).forEach(heading => {
+      const fold = heading.dataset.fold;
+
+      const siblings = [];
+      let el = heading.nextElementSibling;
+      while (el && !isHeading(el, level)) {
+        const next = el.nextElementSibling;
+        siblings.push(el);
+        el = next;
+      }
+
+      const details = document.createElement('details');
+      details.className = `section-fold section-fold-${tag}`;
+      if (fold === 'open') details.open = true;
+
+      const summary = document.createElement('summary');
+      summary.className = `section-fold-summary ${tag}-summary`;
+
+      const arrow = () => details.open ? '▾ ' : '▸ ';
+      const titleText = heading.textContent;
+      summary.textContent = arrow() + titleText;
+      details.addEventListener('toggle', () => {
+        summary.textContent = arrow() + titleText;
+      });
+
+      // Preserve heading id/level for anchor links and styling
+      const innerHeading = document.createElement(tag);
+      innerHeading.id = heading.id;
+      innerHeading.style.display = 'none'; // visually replaced by summary, kept for anchors
+
+      const body = document.createElement('div');
+      body.className = 'section-fold-body';
+      siblings.forEach(s => body.appendChild(s));
+
+      details.appendChild(summary);
+      details.appendChild(innerHeading);
+      details.appendChild(body);
+      heading.replaceWith(details);
+    });
+  });
+}
+
 // ─── Loader ───────────────────────────────────────────────────────────────────
 
 function buildShell() {
@@ -349,6 +419,7 @@ async function loadPage(mdPath) {
 
     root.innerHTML = `<article class="lesson">${marked.parse(text)}</article>`;
     mountBoxes(root);
+    mountFoldingSections(root);
   } catch (err) {
     root.innerHTML = `<p class="load-error">Could not load page: ${err.message}</p>`;
   }

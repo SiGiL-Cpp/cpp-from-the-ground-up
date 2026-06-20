@@ -366,7 +366,7 @@ function mountFoldingSections(root) {
     return !isNaN(lvl) && lvl <= maxLevel;
   };
 
-  ['h3', 'h2'].forEach(tag => {
+  ['h4', 'h3', 'h2'].forEach(tag => {
     const level = parseInt(tag[1]);
     root.querySelectorAll(`${tag}[data-fold]`).forEach(heading => {
       const fold = heading.dataset.fold;

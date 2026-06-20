@@ -84,7 +84,7 @@ So our `163` is `true` if we look at it as a boolean value.
 ```
 
 <p align="center">
-  <img alt="Phineas meme: \"Isn't it a little wasteful? - Yes, yes it is\""
+  <img alt="Phineas meme: &quot;Isn't it a little wasteful? - Yes, yes it is&quot;"
     src="imgs/FWastefulMeme.jpg"/>
 </p>
 
@@ -241,70 +241,190 @@ But what happens with `-128`? We apply same pattern, of course.
 
 ### Bytes as light intensity
 
-The screen displays pixels, and these pixels can send more or less light intensity. We can interpret the value of a Byte as how bright we want a pixel to be.
+Some interpretations are relatively straight-forward. The screen displays
+pixels, and these pixels can send more or less light intensity. We can interpret
+the value of a Byte as how bright we want a pixel to be.
 
 - At `0`, it is black <span style="display: inline-block; width: 1.1em; height: 1.1em; background-color: #000000;border: 1px solid var(--text);vertical-align:middle;"></span>.
 - At `255`, it is white <span style="display: inline-block; width: 1.1em; height: 1.1em; background-color: #ffffff;border: 1px solid var(--text);vertical-align:middle;"></span>.
+```rec: Example
 - At `163`, it is a medium light-ish gray <span style="display: inline-block; width: 1.1em; height: 1.1em; background-color: #A3A3A3;border: 1px solid var(--text);vertical-align:middle;"></span>.
+```
 
-### Byte as fixed point
+### Byte as &real;eal numbers
 
-We now have positive and negative numbers, but there's a whole infinity of numbers between 0 and 1. How do we tap into this range? The most common way is through floating-point, but floating-points are complicated. I'll treat them as in a folding box just below. For now, we will look at the much simpler fixed point.
+We now have positive and negative numbers, but there's a whole infinity of
+numbers between 0 and 1. How do we tap into this range? As we have said before,
+we only have 256 different values for a Byte, so we will have to find strategies
+to use these values wisely. The most common way is through floating-point, but
+floating-points are complicated.
 
-We have 256 values, ranging by default from 0 to 255. The question is how much detail do we want. We could decide that what we count, 0, 1, 2, 3, 4... are halves and not wholes, so it would go 0, 0.5, 1, 1.5, 2... Or we could decide we're counting quarters, or eigths. This is just another filter of interpretation.
+#### Byte as Fixed point
 
-We could combine that with the [Signed Byte](#signed-bytes) trick with this, and have signed values that represent 8th: [-32, -31.75, -31.5, -31.25 .. -0.5, -0.25, 0, 0.25, 0.5 .. 31.25, 31.5, 31.75].
+For now, we will look at the much simpler fixed point.
 
-For `163`, as a signed fixed-point with 4 integer binary digits and 3 fractional binary digits (i.e. made of 8<sup>th</sup>), we have already worked out that it reads as `-93` as a [Signed Byte](#signed-bytes). If we consider it made of 8<sup>th</sup>, we have -93/8 = `-11.625`.
+Counting from 0 to 255 was easy enough. What if we decided they were not wholes
+but halves? Now we have 0, 0.5, 1, 1.5, 2... all the way up to 127.5; What if we
+decided we are counting quarters, or eigths? This is just another filter of
+interpretation.
 
-```fold
-### Byte as floating point
+We could combine the [Signed Byte](#signed-bytes) trick with this, and have
+signed values that represent 8th: [-16, -15.75, -15.5, -15.25 .. -0.5, -0.25, 0,
+0.25, 0.5 .. 15.25, 15.5, 15.75].
 
-The floating-point representation will make more sense later on, but I wanted to introduce it here, as it is heavily used in all kind of applications, and more tricky than most people realise.
+```rec: Example
+For `163`, as a signed fixed-point with 5 signed integer binary digits and 3
+fractional binary digits (i.e. made of 8<sup>th</sup>), we have already worked
+out that it reads as `-93` as a [Signed Byte](#signed-bytes). If we consider it
+made of 8<sup>th</sup>, we have -93/8 = `-11.625`. 
+```
+
+#### > Byte as floating point
+
+The floating-point representation will make more sense later on, but I wanted to
+introduce it here, as it is heavily used in all kind of applications, and more
+tricky than most people realise.
+
+One key idea behind this representation is that we usually care about precision
+for small numbers, and not so much for large ones. For instance, over a
+centimeter or an inch, I care about a millimeter. But over a kilometer or a
+mile, not so much.
+
+So we will try to spread our 256 values in such a way that we have many values
+close together near 0, and fewer as we step away from 0.
 
 This representation breaks our 8 binary digits into 3 parts:
-- The first digit is for the sign of the number: 0 for positive numbers, 1 for negative numbers.
-- Then a few digits for something called the Exponent.
-- And the remaining digits for what is called the Mantissa.
+- The first digit is for the *sign* of the number: 0 for positive numbers, 1 for
+  negative numbers.
+- Then a few digits for something called the *Exponent*.
+- And the remaining digits for what is called the *Mantissa*.
 
-There are different format. In the E4M3 format, the Exponent uses 4 digits, and the Mantissa 3 (hence E4M3), leaving 1 digit for the sign.
+There are different format. For our purpose, we will choose:
+- 1 binary digit (bit) for the sign,
+- 4 bits for the Exponent,
+- 3 bits for the Mantissa.
 
-The short version is that the number is computed as `sign` 2<sup>`Exponent`</sup> `Mantissa`.
+This means that every 8 (2<sup>3</sup>) values, we will double the space between our
+values when we step away from 0.
+
+**The short version is that the number is computed as `sign`
+2<sup>`Exponent`</sup> `Mantissa`.**
+
+<svg width="100%" viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>Three exponent bands of an 8-bit float, each twice the width of the last</title>
+<desc>A number line divided into three labelled regions I, II, and III, laid out edge to edge. Each region holds exactly 8 representable values, evenly spaced within it, but region II is twice as wide as region I, and region III is twice as wide as region II. The gap at each junction equals the new band's spacing, the moment the step size doubles.</desc>
+<rect x="40.00" y="40" width="85.71" height="80" rx="6" fill="var(--rec-border)" fill-opacity="0.18"/>
+<rect x="125.71" y="40" width="171.43" height="80" rx="6" fill="var(--tri-border)" fill-opacity="0.18"/>
+<rect x="297.14" y="40" width="342.86" height="80" rx="6" fill="var(--imp-border)" fill-opacity="0.18"/>
+<g stroke="var(--rec-label)" stroke-width="2">
+<line x1="40.00" y1="50" x2="40.00" y2="120"/>
+<line x1="50.71" y1="50" x2="50.71" y2="120"/>
+<line x1="61.43" y1="50" x2="61.43" y2="120"/>
+<line x1="72.14" y1="50" x2="72.14" y2="120"/>
+<line x1="82.86" y1="50" x2="82.86" y2="120"/>
+<line x1="93.57" y1="50" x2="93.57" y2="120"/>
+<line x1="104.29" y1="50" x2="104.29" y2="120"/>
+<line x1="115.00" y1="50" x2="115.00" y2="120"/>
+</g>
+<g stroke="var(--tri-label)" stroke-width="2">
+<line x1="125.71" y1="50" x2="125.71" y2="120"/>
+<line x1="147.14" y1="50" x2="147.14" y2="120"/>
+<line x1="168.57" y1="50" x2="168.57" y2="120"/>
+<line x1="190.00" y1="50" x2="190.00" y2="120"/>
+<line x1="211.43" y1="50" x2="211.43" y2="120"/>
+<line x1="232.86" y1="50" x2="232.86" y2="120"/>
+<line x1="254.29" y1="50" x2="254.29" y2="120"/>
+<line x1="275.71" y1="50" x2="275.71" y2="120"/>
+</g>
+<g stroke="var(--imp-label)" stroke-width="2">
+<line x1="297.14" y1="50" x2="297.14" y2="120"/>
+<line x1="340.00" y1="50" x2="340.00" y2="120"/>
+<line x1="382.86" y1="50" x2="382.86" y2="120"/>
+<line x1="425.71" y1="50" x2="425.71" y2="120"/>
+<line x1="468.57" y1="50" x2="468.57" y2="120"/>
+<line x1="511.43" y1="50" x2="511.43" y2="120"/>
+<line x1="554.29" y1="50" x2="554.29" y2="120"/>
+<line x1="597.14" y1="50" x2="597.14" y2="120"/>
+</g>
+<text x="82.86" y="32" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="15" font-weight="600" fill="var(--text)">I</text>
+<text x="211.43" y="32" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="15" font-weight="600" fill="var(--text)">II</text>
+<text x="468.57" y="32" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="15" font-weight="600" fill="var(--text)">III</text>
+<text x="82.86" y="148" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="var(--text)">8 values</text>
+<text x="211.43" y="148" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="var(--text)">8 values</text>
+<text x="468.57" y="148" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="13" fill="var(--text)">8 values</text>
+<text x="82.86" y="166" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="var(--muted)">width w</text>
+<text x="211.43" y="166" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="var(--muted)">width 2w</text>
+<text x="468.57" y="166" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" fill="var(--muted)">width 4w</text>
+</svg>
 
 But that's not even half of the headache.
 
 - The `sign` is simple enough, let's celebrate this.
-- The `Exponent` has special values. Both it's minimum and maximum values as special.
-- The other values of the `Exponent` that are less special have a "bias". Nothing romantic, it means that we have to subtract a specific value (the bias) from the raw number to know its value. In E4M3 format the bias is typically 7. So if the raw value of the Expnent is 1, we should read the exponent as -6. If the raw value is 7, we should read it as 0. If the raw value is 14 (1 less than the maximum value we can represent with 4 bits), we should read it as 7.
-- The `Mantissa` is a [fixed point](#byte-as-fixed-point) number. It is scaled based on its number of bits: if it has 3 digits, it is divided by 2<sup>3</sup> (i.e. it represents 8<sup>th</sup>).
-- If the `Exponent` raw value is not 0 (which is a special case mentioned above), the `Mantissa` should be read as if there was an additional digit set to 1 before it (implicit leading 1).
+- The `Exponent` has special values. Both it's minimum and maximum values as
+  special.
+- The other values of the `Exponent` that are less special have a "bias".
+  Nothing romantic, it means that we have to subtract a specific value (the
+  bias) from the raw number to know its value. For our format, we will choose a
+  bias of 7. So if the raw value of the Expnent is 1, we should read the exponent
+  as -6. If the raw value is 7, we should read it as 0. If the raw value is 14 (1
+  less than the maximum value we can represent with 4 bits), we should read it as 7.
+- The `Mantissa` is a [fixed point](#byte-as-fixed-point) number. It is scaled
+  based on its number of bits: if it has 3 digits, it is divided by
+  2<sup>3</sup> (i.e. it represents 8<sup>th</sup>).
+- If the `Exponent` raw value is not 0 (which is a special case mentioned
+  above), the `Mantissa` should be read as if there was an additional digit set
+  to 1 before it (implicit leading 1).
 
 And then there are all the special cases.
 
-For instance, if I was to split `163` according to the E4M3 format, I would get this:
+```rec: Example
+For instance, if I was to split `163` according to our format, I would get this:
 - `1` for the sign,
 - `4` for the raw Exponent,
 - `3` for the Mantissa.
 
-The Exponent is neither 0 nor 15, so we read it by subtracting 7 from it. 4 - 7 = `-3`.
+The Exponent is neither 0 nor 15, so we read it by subtracting 7 from it. 
+4 - 7 = `-3`.
 
-Since the Exponent is not 0, we should read the Mantissa as a fixed point number made of 8<sup>th</sup> and add a leading 1 before it. Three 8<sup>th</sup> is `0.375`, and with a leading 0, we get `1.375`.
+Since the Exponent is not 0, we should read the Mantissa as a fixed point number
+made of 8<sup>th</sup> and add a leading 1 before it. Three 8<sup>th</sup> is
+`0.375`, and with a leading 0, we get `1.375`.
 
 We can finally form the final result: - 2<sup>-3</sup> × 1.375 = - 0.125 × 1.375 = `-0.171875`.
+```
 
-The subtlety and complexity of floating point numbers is astonishing, but fortunately, their usage is simple. This makes them a double-edged sword: easy to use and powerful... until we start to look at them from up close.
+The subtlety and complexity of floating point numbers is astonishing, but
+fortunately, their usage is simple. This makes them a double-edged sword: easy
+to use and powerful... until we start to look at them from up close.
 
+```trivia: What that complexity buys us
+While this representation is particularly complex, it has a great advantage:
+
+Even our naive 1-4-3 format allows to represent values both positive and
+negative with magnitudes as large as `240` (though near that magnitude
+consecutive values are spaced 16 apart), or as small as `0.015625` (with a gap
+of only about 0.002 between consecutive values at that scale).
+
+Floating points should be used in situations where we accept this property:
+It is precise around `0` but that precision degrades as the values grow in
+magnitude.
 ```
 
 ### The many Faces of a Byte
 
 ```rec
-That was 5 different ways to look at a single Byte. We are barely scrathing the surface, but hopefully, you start to see how a universe made of nothing else than numbers might not be boring afterall.
+That was 6 (or 8 if you went through the secret sections) different ways to look
+at a single Byte. We are barely scrathing the surface, but hopefully, you start
+to see how a universe made of nothing else than numbers might not be boring
+afterall.
 
-The concept behind these interpretations of a same number is Fundamental for programmers, and we will encounter it at every turn: it is the notion of ***semantic***: the specific meaning that the data encodes.
+The concept behind these interpretations of a same number is **fundamental** for
+programmers, and we will encounter it at every turn: it is the notion of
+***semantic***: the specific meaning that the data encodes. 
 ```
 
-Let's take a few minutes to experiment and play with the different representations of a Byte we have discussed above.
+Let's take a few minutes to experiment and play with the different
+representations of a Byte we have discussed above.
 
 ```gadget
 src: gadgets/byte-lens.html
@@ -317,20 +437,34 @@ There is only so much we can do with 256 values.
 
 ### Two Bytes
 
-In decimal, 2-digit numbers give 100 different values (0..99). But if we stack together two of those, we get a 4-digit number which can represent 10.000 values (0..9999).
+In decimal, 2-digit numbers give 100 different values (0..99). But if we stack
+together two of those, we get a 4-digit number which can represent 10.000 values
+(0..9999).
 
-In the same way, if we stack two Bytes together, we don't just double the number of possible values, we multiply them, giving `65.536` possible values.
+In the same way, if we stack two Bytes together, we don't just double the number
+of possible values, we multiply them, giving `65.536` possible values.
 
-We will come back to values encoded over two Bytes a bit later, especially when we look at audio formats.
+We will come back to values encoded over two Bytes a bit later, especially when
+we look at audio formats.
 
 ### A different kind of Word
 
-A Word in computing, used to refer to the "default" or "natural" size of the data for a specific architecture. So a Word is not a specific, set number of Bytes. The default size of a unit of data grew over time, and is often currently, either 4 Bytes (32 bits) or 8 Bytes (64 bits) for the most common architectures.
+A Word in computing, used to refer to the "default" or "natural" size of the
+data for a specific architecture. So a Word is not a specific, set number of
+Bytes. The default size of a unit of data grew over time, and is often
+currently, either 4 Bytes (32 bits) or 8 Bytes (64 bits) for the most common
+architectures.
 
-```trivia
-The x86 architecture used, a long time ago, a Word that was 2 Bytes long. When they later doubled that, evolving the architecture to use 4-Byte-long values as the natural "default", they decided to keep their old definition of Word as a 2-Byte-long value, and called the new 4-Byte values Doubleword (DWORD). Later, 8-Byte-long values were introduced as Quadwords (QWORD).
+```trivia < The word `Word` is ambiguous
+The x86 architecture used, a long time ago, a Word that was 2 Bytes long. When
+they later doubled that, evolving the architecture to use 4-Byte-long values as
+the natural "default", they decided to keep their old definition of Word as a
+2-Byte-long value, and called the new 4-Byte values Doubleword (DWORD). Later,
+8-Byte-long values were introduced as Quadwords (QWORD).
 
-This departure from the original definition of a Word creates ambiguity, and we will prefer starting to call the types by their number of bits (a bit is a binary digit, there are 8 bits in a Byte).
+This departure from the original definition of a Word creates ambiguity, and we
+will prefer starting to call the types by their number of bits (a bit is a
+binary digit, there are 8 bits in a Byte). 
 ```
 
 

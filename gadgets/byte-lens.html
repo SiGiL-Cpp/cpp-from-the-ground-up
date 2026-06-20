@@ -159,13 +159,54 @@
       border: 1px solid var(--border);
       flex-shrink: 0;
     }
+
+    .bitfield-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+
+    .bitfield-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .bitfield-badge {
+      width: 38px;
+      height: 24px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      background: var(--surface);
+      color: var(--muted);
+    }
+
+    .bitfield-badge.is-true {
+      background: var(--blue-bg);
+      color: var(--blue-fg);
+      border-color: var(--blue-brd);
+    }
+
+    .bitfield-index {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+    }
   </style>
 </head>
 <body>
 
   <div class="row">
     <span class="lbl">your number</span>
-    <input type="number" id="inp" value="130" step="1" />
+    <input type="number" id="inp" value="163" step="1" />
   </div>
 
   <div class="row">
@@ -188,7 +229,10 @@
       <option value="int8">int8 — signed byte</option>
       <option value="char">char — ASCII character</option>
       <option value="bool">bool — true / false</option>
+      <option value="bitfield">bitfield — 8 booleans</option>
       <option value="gray">gray — light intensity</option>
+      <option value="fixed">fixed-point — 3 fractional digits</option>
+      <option value="float">float8 — E4M3 floating point</option>
       <option value="hex">hex — base 16</option>
       <option value="binary">binary — base 2</option>
     </select>
@@ -236,7 +280,46 @@
         return { val: `'${String.fromCharCode(u8)}'`, note: `ASCII character — code ${u8}` };
       },
       bool:   (u8) => ({ val: u8 === 0 ? 'false' : 'true', note: u8 === 0 ? 'zero is the only false value' : `any non-zero value is true` }),
+      bitfield: (u8) => {
+        const bits = u8.toString(2).padStart(8, '0').split('').map(b => b === '1');
+        return {
+          val: bits.filter(Boolean).length + ' of 8 are true',
+          note: 'each bit read independently as its own true/false value',
+          bitfield: bits,
+        };
+      },
       gray:   (u8) => ({ val: `${u8} / 255`, note: 'light intensity — 0 is black, 255 is white', swatch: `rgb(${u8},${u8},${u8})` }),
+      fixed:  (u8) => {
+        // 3 fractional "digits" out of 8 bits: top 5 bits = whole part, bottom 3 bits = eighths
+        const v = u8 >= 128 ? u8 - 256 : u8;
+        const whole = v >> 3;
+        const frac  = v & 0b111;
+        const value = whole + frac / 8;
+        return {
+          val: value.toFixed(3),
+          note: `top 5 bits = whole part (${whole}), bottom 3 bits = eighths (${frac}/8) — range 0 to 31.875, fixed step of 0.125`,
+        };
+      },
+      float:  (u8) => {
+        const sign = (u8 >> 7) & 1;
+        const exp  = (u8 >> 3) & 0xF;
+        const mant = u8 & 0x7;
+        let value, note;
+        if (exp === 0xF && mant === 0x7) {
+          value = 'NaN';
+          note = 'exponent and mantissa both all-ones — not a number (E4M3 reserves only this one pattern)';
+        } else if (exp === 0) {
+          value = ((mant / 8) * Math.pow(2, 1 - 7)) * (sign ? -1 : 1);
+          note = `subnormal — exponent is all-zero, value = (mantissa/8) × 2⁻⁶ = ${mant}/8 × 2⁻⁶`;
+        } else {
+          value = ((1 + mant / 8) * Math.pow(2, exp - 7)) * (sign ? -1 : 1);
+          note = `normal — sign ${sign}, exponent ${exp} (bias 7 → 2^${exp - 7}), mantissa ${mant}/8 → (1 + ${mant}/8) × 2^${exp - 7}`;
+        }
+        return {
+          val: typeof value === 'number' ? value.toString() : value,
+          note: `E4M3: 1 sign bit, 4 exponent bits, 3 mantissa bits — ${note}`,
+        };
+      },
       hex:    (u8) => ({ val: '0x' + u8.toString(16).toUpperCase().padStart(2,'0'), note: 'base 16 — each digit represents 4 bits' }),
       binary: (u8) => ({ val: '0b' + u8.toString(2).padStart(8,'0'), note: 'base 2 — the raw bit pattern' }),
     };
@@ -259,7 +342,7 @@
         `<div class="bit ${b==='1'?'bit-1':''}">${b}</div>`
       ).join('');
 
-      const { val, note, swatch } = lenses[lsel.value](u8);
+      const { val, note, swatch, bitfield } = lenses[lsel.value](u8);
       document.getElementById('result-val').textContent = val;
       document.getElementById('result-note').textContent = note;
 
@@ -269,6 +352,15 @@
           <div class="swatch" style="background:${swatch};"></div>
           <span class="result-note">${swatch}</span>
         </div>`;
+      } else if (bitfield) {
+        extra.innerHTML = `<div class="bitfield-row">${
+          bitfield.map((b, i) => `
+            <div class="bitfield-item">
+              <div class="bitfield-badge ${b ? 'is-true' : ''}">${b ? 'T' : 'F'}</div>
+              <span class="bitfield-index">${i}</span>
+            </div>
+          `).join('')
+        }</div>`;
       } else {
         extra.innerHTML = '';
       }

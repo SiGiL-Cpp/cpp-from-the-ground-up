@@ -39,6 +39,13 @@
   --run-bg:      #1e3a7a;
   --run-hover:   #2a50aa;
   --run-text:    #aaccff;
+
+  --rec-label-bg:  #162e22;
+  --imp-label-bg:  #2e1812;
+  --tri-label-bg:  #14202e;
+  --ref-label-bg:  #1e1e14;
+  --info-label-bg: #18182a;
+  --play-label-bg: #0e1428;
 }
 
 html { font-size: 16px; }
@@ -197,25 +204,25 @@ body {
 /* ─── Box Variants ─────────────────────────────────────────────────────────── */
 
 .box-rec       { background: var(--rec);  border-color: var(--rec-border); }
-.box-rec       > .box-label { color: var(--rec-label);  background: #162e22; }
+.box-rec       > .box-label { color: var(--rec-label);  background: var(--rec-label-bg); }
 
 .box-important { background: var(--imp);  border-color: var(--imp-border); }
-.box-important > .box-label { color: var(--imp-label);  background: #2e1812; }
+.box-important > .box-label { color: var(--imp-label);  background: var(--imp-label-bg); }
 
 .box-trivia    { background: var(--tri);  border-color: var(--tri-border); }
-.box-trivia    > .box-label { color: var(--tri-label);  background: #14202e; }
+.box-trivia    > .box-label { color: var(--tri-label);  background: var(--tri-label-bg); }
 
 .box-ref       { background: var(--ref);  border-color: var(--ref-border); }
-.box-ref       > .box-label { color: var(--ref-label);  background: #1e1e14; }
+.box-ref       > .box-label { color: var(--ref-label);  background: var(--ref-label-bg); }
 
 .box-info      { background: var(--info); border-color: var(--info-border); }
-.box-info      > .box-label { color: var(--info-label); background: #18182a; }
+.box-info      > .box-label { color: var(--info-label); background: var(--info-label-bg); }
 
 .box-playground { background: var(--play); border-color: var(--play-border); }
-.box-playground > .box-label { color: var(--play-label); background: #0e1428; }
+.box-playground > .box-label { color: var(--play-label); background: var(--play-label-bg); }
 
 .box-gadget    { background: var(--play); border-color: var(--play-border); }
-.box-gadget    > .box-label { color: var(--play-label); background: #0e1428; }
+.box-gadget    > .box-label { color: var(--play-label); background: var(--play-label-bg); }
 
 /* ─── Foldable boxes ───────────────────────────────────────────────────────── */
 /* Applied to any box type when a fold marker (> or <) is used in the fence.   */
@@ -435,6 +442,13 @@ body {
   --run-bg:      #dce8ff;
   --run-hover:   #c0d4ff;
   --run-text:    #1a3aaa;
+
+  --rec-label-bg:  #d8eee0;
+  --imp-label-bg:  #fbe2dd;
+  --tri-label-bg:  #dde9f8;
+  --ref-label-bg:  #f0ecd8;
+  --info-label-bg: #e4e4f4;
+  --play-label-bg: #d4dcf8;
 }
 
 [data-theme="light"] .lesson h1    { color: #111; border-color: var(--border); }
@@ -450,7 +464,6 @@ body {
 [data-theme="light"] .lesson strong    { color: #111; }
 [data-theme="light"] .lesson em        { color: #555; }
 
-[data-theme="light"] .box-info .box-label { background: #e4e4f4; }
 [data-theme="light"] .box-foldable > summary.box-label:hover { filter: brightness(0.97); }
 
 [data-theme="light"] .playground-editor         { background: #e8ecf8; color: #1a2a4a; }
@@ -459,8 +472,6 @@ body {
 [data-theme="light"] .playground-output         { background: #e4e8f8; color: #1a3060; }
 [data-theme="light"] .playground-output.error   { color: #9a2a1a; }
 [data-theme="light"] .playground-svg            { background: #e4e8f8; }
-[data-theme="light"] .box-playground .box-label { background: #d4dcf8; }
-[data-theme="light"] .box-gadget     .box-label { background: #d4dcf8; }
 
 [data-theme="light"] .site-header   { background: #eeedea; border-color: #d0cdc8; }
 [data-theme="light"] .theme-toggle  { color: #555; border-color: #ccc; }

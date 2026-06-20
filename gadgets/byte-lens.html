@@ -21,7 +21,7 @@
     }
 
     @media (prefers-color-scheme: light) {
-      :root {
+      :root:not([data-theme]) {
         --bg:       #f5f4f0;
         --surface:  #eeedea;
         --border:   #d0cdc8;
@@ -31,6 +31,17 @@
         --blue-fg:  #1a3aaa;
         --blue-brd: #85b7eb;
       }
+    }
+
+    :root[data-theme="light"] {
+      --bg:       #f5f4f0;
+      --surface:  #eeedea;
+      --border:   #d0cdc8;
+      --text:     #1e1c1a;
+      --muted:    #888480;
+      --blue-bg:  #dce8ff;
+      --blue-fg:  #1a3aaa;
+      --blue-brd: #85b7eb;
     }
 
     body {
@@ -154,12 +165,12 @@
 
   <div class="row">
     <span class="lbl">your number</span>
-    <input type="number" id="inp" value="163" step="1" />
+    <input type="number" id="inp" value="130" step="1" />
   </div>
 
   <div class="row">
     <span class="lbl">as uint8</span>
-    <span class="u8-val" id="u8val">163</span>
+    <span class="u8-val" id="u8val">130</span>
     <span class="u8-note" id="u8note"></span>
   </div>
 
@@ -193,6 +204,20 @@
   </div>
 
   <script>
+    // Theme: read from ?theme= on load, update live if the parent page toggles it.
+    (function () {
+      const param = new URLSearchParams(window.location.search).get('theme');
+      if (param === 'light' || param === 'dark') {
+        document.documentElement.setAttribute('data-theme', param);
+      }
+    })();
+
+    window.addEventListener('message', (e) => {
+      if (e.data?.type === 'set-theme') {
+        document.documentElement.setAttribute('data-theme', e.data.theme);
+      }
+    });
+
     const inp  = document.getElementById('inp');
     const lsel = document.getElementById('lens');
 
@@ -204,15 +229,11 @@
         const v = u8 >= 128 ? u8 - 256 : u8;
         return { val: String(v), note: v < 0 ? 'values 128..255 map to −128..−1' : 'signed integer — range −128 to 127' };
       },
-      char: (u8) => {
+      char:   (u8) => {
         if (CTRL[u8] !== undefined) return { val: CTRL[u8], note: 'non-printable control character' };
-        if (u8 < 32)   return { val: '(control char)', note: `ASCII ${u8} — non-printable` };
+        if (u8 < 32)  return { val: '(control char)', note: `ASCII ${u8} — non-printable` };
         if (u8 === 127) return { val: 'DEL', note: 'delete control character' };
-        const ch = new TextDecoder('windows-1252').decode(new Uint8Array([u8]));
-        const printable = ch.charCodeAt(0) > 31;
-        return printable
-          ? { val: `'${ch}'`, note: `extended ASCII — code ${u8}` }
-          : { val: '(control char)', note: `ASCII ${u8} — non-printable` };
+        return { val: `'${String.fromCharCode(u8)}'`, note: `ASCII character — code ${u8}` };
       },
       bool:   (u8) => ({ val: u8 === 0 ? 'false' : 'true', note: u8 === 0 ? 'zero is the only false value' : `any non-zero value is true` }),
       gray:   (u8) => ({ val: `${u8} / 255`, note: 'light intensity — 0 is black, 255 is white', swatch: `rgb(${u8},${u8},${u8})` }),

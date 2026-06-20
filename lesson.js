@@ -36,6 +36,7 @@ function toggleTheme() {
   const next    = current === 'dark' ? 'light' : 'dark';
   setCookie('theme', next);
   applyTheme(next);
+  broadcastThemeToGadgets(next);
 }
 
 // ─── Marked Configuration ─────────────────────────────────────────────────────
@@ -45,6 +46,9 @@ marked.use({
     // Headings starting with '>' or '<' become foldable sections:
     //   ## > Collapsed section title
     //   ## < Section that starts expanded
+    // Note: by the time this renderer runs, marked has already inline-rendered
+    // the heading text, which HTML-escapes '<' and '>' into entities. We match
+    // on the escaped forms (and raw forms, just in case) for robustness.
     heading(text, level) {
       let fold = null;
       let clean = text;
@@ -314,9 +318,13 @@ function renderSVGFrames(container, rawOutput) {
 function makeGadget(rawContent, title, fold) {
   const config = jsyaml.load(rawContent);
 
+  const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+  const sep   = config.src.includes('?') ? '&' : '?';
+
   const iframe = document.createElement('iframe');
-  iframe.src           = config.src;
+  iframe.src           = `${config.src}${sep}theme=${theme}`;
   iframe.style.cssText = ['width:100%', `height:${config.height || 400}px`, 'border:none', 'display:block'].join(';');
+  iframe.dataset.gadgetSrc = config.src; // base src, without theme param
 
   window.addEventListener('message', (e) => {
     if (e.data?.type === 'gadget-height' && e.data.src === config.src)
@@ -324,6 +332,13 @@ function makeGadget(rawContent, title, fold) {
   });
 
   return wrapBox('gadget', title || BOX_DEFAULTS.gadget, iframe, fold);
+}
+
+// Tells every mounted gadget iframe to switch theme live, instead of requiring a reload.
+function broadcastThemeToGadgets(theme) {
+  document.querySelectorAll('iframe[data-gadget-src]').forEach(iframe => {
+    iframe.contentWindow?.postMessage({ type: 'set-theme', theme }, '*');
+  });
 }
 
 // ─── Markdown Post-Processor ──────────────────────────────────────────────────

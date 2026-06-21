@@ -1,7 +1,7 @@
 ---
 title: "01 — Data"
 prev: null
-next: "02-arrays"
+next: "02-types"
 ---
 
 # 01 - Data
@@ -601,7 +601,10 @@ src: gadgets/image-lens.html
 height: 700
 ```
 
-### > Sound
+Of course, if we can represent images, we can represent sequences of images:
+animations, too.
+
+### > Sound...
 
 A sequence of values can also express sound. A speaker is essentially a system
 where electricity is converted into a magnetic field, which in turn pushes or
@@ -622,3 +625,17 @@ clearer `0` means leaving the membrane at rest.
 Worth noting that outputting random values to a speaker can damage it. The
 membrane is built to oscillate at specific frequencies with specific
 intensities. Please be careful if you play with that.
+
+## 
+```info: Takeaway
+- All a program manipulate is made of numbers, at the core.
+- There are many ways to look at these numbers and interpret them.
+- A Byte is a number made of 8 binary digits (8 bits). It can represent 256
+  different values.
+  - It is the smallest unit of data the computer works with. 
+- A Word is a number usually made of mode digits than a Byte. Nowadays usually
+  32 or 64 binary digits (32 bits or 64 bits, 4 or 8 Bytes).
+- Some representations are straight-forward, others are complicated.
+- With enough numbers we can represent any kind of content:
+  - Text, Images, Sound, etc...
+```

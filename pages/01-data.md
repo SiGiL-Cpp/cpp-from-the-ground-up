@@ -15,7 +15,7 @@ and "rebuild" C++ from its most elementary pieces.
 
 ```trivia: Principle
 Excellence in (pretty much) any domain is better demonstrated by a deep mastery
-of its basics, rather than a catalog of its most obscure subtleties. 
+of its basics, rather than a catalogue of its most obscure subtleties. 
 ```
 
 ```rec: Example
@@ -40,7 +40,7 @@ We won't go in details over the binary representation of numbers for now as it
 is not required for our current purpose. If you wish to investigate the subject,
 there are many good resources on the subject.
 - [Khan Academy](https://www.khanacademy.org/computing/computers-and-internet/xcae6f4a7ff015e7d:digital-information/xcae6f4a7ff015e7d:binary-numbers/a/bits-and-binary)
-- [Practical Networking Youtube](https://www.youtube.com/watch?v=RrJXLdv1i74)
+- [Practical Networking YouTube](https://www.youtube.com/watch?v=RrJXLdv1i74)
 ```
 
 ```rec: Example
@@ -65,7 +65,7 @@ the number `49`. Although this number can seem arbitrary when expressed in
 decimal, it makes more sense for those familiar with its binary representation
 (32 + 16 + 1).
 
-ASCII is a very common way of interpreting numbers as (latin) characters, but by
+ASCII is a very common way of interpreting numbers as (Latin) characters, but by
 no means the only one.
 
 ### Bytes as true/false, on/off, yes/no values
@@ -82,7 +82,7 @@ representation. The reasons for this will be explained much later in this
 series, but for now, a hand-wavy explanation would be that the computer only
 ever works on at least one Byte: 8 binary digits.
 
-**Through the boolean lense, numbers are interpreted in this way: if the number
+**Through the boolean lens, numbers are interpreted in this way: if the number
 is `0`, it is `false`; otherwise, it is `true`.**
 
 ```rec: Example
@@ -209,8 +209,8 @@ negative number: `-93`.
 ```
 
 ````trivia: Subtlety
-Notice the asymetry between the largest `127` and lowest `-128` values that can
-be represented with a signed Byte.
+Notice the asymmetry between the largest `127` and lowest `-128` values that
+can be represented with a signed Byte.
 
 This is due to having `0` between the strictly positive and strictly negative
 numbers, but an even number of possible values for a Byte (256). So there are
@@ -271,7 +271,7 @@ For now, we will look at the much simpler fixed point.
 
 Counting from 0 to 255 was easy enough. What if we decided they were not wholes
 but halves? Now we have 0, 0.5, 1, 1.5, 2... all the way up to 127.5; What if we
-decided we are counting quarters, or eigths? This is just another filter of
+decided we are counting quarters, or eighths? This is just another filter of
 interpretation.
 
 We could combine the [Signed Byte](#signed-bytes) trick with this, and have
@@ -293,7 +293,7 @@ tricky than most people realise.
 
 One key idea behind this representation is that we usually care about precision
 for small numbers, and not so much for large ones. For instance, over a
-centimeter or an inch, I care about a millimeter. But over a kilometer or a
+centimetre or an inch, I care about a millimetre. But over a kilometre or a
 mile, not so much.
 
 So we will try to spread our 256 values in such a way that we have many values
@@ -371,7 +371,7 @@ But that's not even half of the headache.
 - The other values of the `Exponent` that are less special have a "bias".
   Nothing romantic, it means that we have to subtract a specific value (the
   bias) from the raw number to know its value. For our format, we will choose a
-  bias of 7. So if the raw value of the Expnent is 1, we should read the exponent
+  bias of 7. So if the raw value of the Exponent is 1, we should read the exponent
   as -6. If the raw value is 7, we should read it as 0. If the raw value is 14 (1
   less than the maximum value we can represent with 4 bits), we should read it as 7.
 - The `Mantissa` is a [fixed point](#byte-as-fixed-point) number. It is scaled
@@ -420,9 +420,9 @@ magnitude.
 
 ```rec
 That was 6 (or 8 if you went through the secret sections) different ways to look
-at a single Byte. We are barely scrathing the surface, but hopefully, you start
+at a single Byte. We are barely scratching the surface, but hopefully, you start
 to see how a universe made of nothing else than numbers might not be boring
-afterall.
+after all.
 
 The concept behind these interpretations of a same number is **fundamental** for
 programmers, and we will encounter it at every turn: it is the notion of
@@ -444,7 +444,7 @@ There is only so much we can do with 256 values.
 ### Two Bytes
 
 In decimal, 2-digit numbers give 100 different values (0..99). But if we stack
-together two of those, we get a 4-digit number which can represent 10.000 values
+together two of those, we get a 4-digit number which can represent 10,000 values
 (0..9999).
 
 In the same way, if we stack two Bytes together, we don't just double the number
@@ -488,8 +488,8 @@ binary digit, there are 8 bits in a Byte).
 - Characters are usually represented with smaller values, over one or two Bytes only.
 - A fixed-point number over 4 Bytes (32 bit) can represent values up
   to 20,000 with a 0.000,01 (10<sup>-5</sup>) precision. That's enough to
-  measure half the perimeter of the Earth in kilometers while retaining a
-  precision at the centimeter.
+  measure half the perimeter of the Earth in kilometres while retaining a
+  precision at the centimetre.
 - Floating-point values also benefit a lot from the additional Bytes.
   - A 32-bit (4 Byte) float can hold 8,388,608 different values per exponent
     band (where our 8-bit representation could only hold 8).
@@ -500,10 +500,10 @@ binary digit, there are 8 bits in a Byte).
   - It can hold values as small as about 4.94&times;10<sup>-324</sup> and as
     large as about 1.8&times;10<sup>308</sup>.
   - But remember, with floating-point values, the precision scales with the number.
-    - For a 32 bit float (4 Bytes), around 10,000,000, the precision is down to
-      1 (10,000,001 is representable, but not 10.000.000,5).
+    - For a 32-bit float (4 Bytes), around 10,000,000, the precision is down to
+      1 (10,000,001 is representable, but not 10,000,000.5).
     - With 64 bits (8 Bytes), around 10,000,000, the precision remains much
-      higher at about 1.86&times;10<sup>-9</sup> (that's roughly 10 nanometer
+      higher at about 1.86&times;10<sup>-9</sup> (that's roughly 10 nanometre
       precision over the circumference of the Earth).
 
 That's a lot of numbers to play with. Mostly, enough for our purpose. But one
@@ -535,7 +535,7 @@ represent the words: "Like that.", complete with a null character at the end.
 
 In a similar way, a sequence of numbers, of Bytes, can be interpreted as an
 image. But for an image, we want to keep the value `0` for "completely black",
-we we can't use the same trick as the text to know when to stop.
+so we can't use the same trick as the text to know when to stop.
 
 In addition, our image is 2D, it has a width and a height. We will need to know
 that if we want to display it properly.
@@ -616,7 +616,7 @@ So a series of values (a single Byte each, or often, two-Byte (16 bits) each)
 can represent exactly this movement.
 
 There has been several format over time. In some old format, we use an unsigned
-8-bit value. `0` means pulling the mambrane as far as it goes, and `255` pushing it
+8-bit value. `0` means pulling the membrane as far as it goes, and `255` pushing it
 as far as it goes the other way.
 
 Modern formats usually use signed values, often over 16 bits (2 Bytes), with a

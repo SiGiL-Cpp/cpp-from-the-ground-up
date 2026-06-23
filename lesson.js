@@ -104,21 +104,21 @@ marked.use({
 // ─── Box Registry ─────────────────────────────────────────────────────────────
 
 const BOX_DEFAULTS = {
-  rec:        '↩ Recap',
-  important:  '⚠ Important',
-  trivia:     '◎ Trivia',
-  ref:        '→ References',
-  info:       'ℹ Info',
+  illus:      '↩ Illustration',
+  pitfall:    '⚠ Pitfall',
+  aside:      '◎ Aside',
+  principle:  '→ Principle',
+  recap:      'ℹ Recap',
   playground: '⌨ Exercise',
   gadget:     '◈ Interactive',
 };
 
 const BOX_TYPES = {
-  rec:        (content, title, fold) => makeBox('rec',       title || BOX_DEFAULTS.rec,       content, fold),
-  important:  (content, title, fold) => makeBox('important', title || BOX_DEFAULTS.important,  content, fold),
-  trivia:     (content, title, fold) => makeBox('trivia',    title || BOX_DEFAULTS.trivia,     content, fold),
-  ref:        (content, title, fold) => makeBox('ref',       title || BOX_DEFAULTS.ref,        content, fold),
-  info:       (content, title, fold) => makeBox('info',      title || BOX_DEFAULTS.info,       content, fold),
+  illus:      (content, title, fold) => makeBox('illus',    title || BOX_DEFAULTS.illus,    content, fold),
+  pitfall:    (content, title, fold) => makeBox('pitfall',   title || BOX_DEFAULTS.pitfall,   content, fold),
+  aside:      (content, title, fold) => makeBox('aside',     title || BOX_DEFAULTS.aside,     content, fold),
+  principle:  (content, title, fold) => makeBox('principle', title || BOX_DEFAULTS.principle, content, fold),
+  recap:      (content, title, fold) => makeBox('recap',     title || BOX_DEFAULTS.recap,     content, fold),
   playground: (content, title, fold) => makePlayground(content, title, fold),
   gadget:     (content, title, fold) => makeGadget(content, title, fold),
 };

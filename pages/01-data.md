@@ -13,12 +13,12 @@ multiplayer game, all we see is built off numbers.
 Building a robust understanding of this simple idea will be useful as we explore
 and "rebuild" C++ from its most elementary pieces.
 
-```trivia: Principle
+```principle
 Excellence in (pretty much) any domain is better demonstrated by a deep mastery
 of its basics, rather than a catalogue of its most obscure subtleties. 
 ```
 
-```rec: Example
+```illus: Example
 In this level we will use the number `163` for our examples.
 
 How many ways can we find to look at it? We will consider at least 6 different
@@ -35,7 +35,7 @@ Similarly, in base 2 (binary), where each of the digit used to write a number
 can take only one of 2 values (0, 1), a **Byte** is an 8-digit number which can
 express 256 different values: from 0 to 255.
 
-```ref
+```aside
 We won't go in details over the binary representation of numbers for now as it
 is not required for our current purpose. If you wish to investigate the subject,
 there are many good resources on the subject.
@@ -43,7 +43,7 @@ there are many good resources on the subject.
 - [Practical Networking YouTube](https://www.youtube.com/watch?v=RrJXLdv1i74)
 ```
 
-```rec: Example
+```illus: Example
 Our number `163` is within the [0..255] range of values, so it can be
 represented by a Byte.
 ```
@@ -55,7 +55,7 @@ href="https://en.wikipedia.org/wiki/ASCII" target="_blank"
 rel="noopener">ASCII</a> which matches numbers between 0 and 255 to specific
 characters.
 
-```rec: Example
+```illus: Example
 According to this convention, the number `163` represents the
 character `'£'`.
 ```
@@ -85,7 +85,7 @@ ever works on at least one Byte: 8 binary digits.
 **Through the boolean lens, numbers are interpreted in this way: if the number
 is `0`, it is `false`; otherwise, it is `true`.**
 
-```rec: Example
+```illus: Example
 So our `163` is `true` if we look at it as a boolean value.
 ```
 
@@ -97,7 +97,7 @@ So our `163` is `true` if we look at it as a boolean value.
 Now, programmers usually hate wasting. If you are curious you can expand this
 box:
 
-````info> Can we do better? Bytes as multiple booleans...
+````aside> Can we do better? Bytes as multiple booleans...
 
 Sometimes, we want to store several true/false values, for instance when storing
 user preferences which are often a collection of yes/no answers. In this case,
@@ -125,7 +125,7 @@ You could visualise the Byte as a row of 8 switches:
 Each switch is one of the 8 digits, and when the switch is off, that specific
 digit is 0; when that switch is on, that specific digit is 1.
 
-```rec: Example
+```illus: Example
 The number `163` in this representation would be Switch 1, 3, 7, and 8 in
 position "On", and Switches 2, 4, 5, and 6 in position "Off".
 <br/>
@@ -142,8 +142,8 @@ values. Since our Byte can only represent 256 distinct values, we will have to
 repurpose some of its values to become negative.
 
 <svg width="592" height="50" style="display:block;margin:auto; --rect-width: 588px;--neg-width: 294px;">
-    <rect x="2" y="2" style="width:var(--neg-width);" height="40" fill="var(--rec)" stroke="rgb(128,128,128)" stroke-width="2"/>
-    <rect x="2" y="2" style="transform:translateX(var(--neg-width));width:calc(var(--rect-width) - var(--neg-width));" height="40" fill="var(--tri)" stroke="rgb(128,128,128)" stroke-width="2" />
+    <rect x="2" y="2" style="width:var(--neg-width);" height="40" fill="var(--illus)" stroke="rgb(128,128,128)" stroke-width="2"/>
+    <rect x="2" y="2" style="transform:translateX(var(--neg-width));width:calc(var(--rect-width) - var(--neg-width));" height="40" fill="var(--aside)" stroke="rgb(128,128,128)" stroke-width="2" />
     <text x="2" y="27" style="transform:translateX(calc(var(--neg-width) / 2));" fill="var(--text)" font-family="sans-serif" font-size="14" text-anchor="middle">[0..127]</text>
     <text x="2" y="27" style="transform:translateX(calc(3 * var(--neg-width) / 2));" fill="var(--text)" font-family="sans-serif" font-size="14" text-anchor="middle">[128..255]</text>
 </svg>
@@ -155,13 +155,13 @@ the second half, from 128 to 255 is moved to the negative range.<br/>
 <svg width="592" height="100" style="display:block;margin:auto; --rect-width: 588px;--neg-width: 294px;" viewBox="-100,0,592, 100">
     <rect x="2" y="2" style="transform:translateX(var(--neg-width));width:var(--neg-width);" height="40" fill="none" stroke="rgb(128,128,128)" stroke-width="2" stroke-dasharray="5,5" />
     <rect x="2" y="2" style="transform:translateX(calc(-1 * var(--neg-width)));width:var(--neg-width);" height="40" fill="none" stroke="rgb(128,128,128)" stroke-width="2" stroke-dasharray="5,5" />
-    <rect x="2" y="2" style="width:var(--neg-width);" height="40" fill="var(--rec)" stroke="rgb(128,128,128)" stroke-width="2" />
-    <rect x="2" y="55" style="transform:translateX(50px);width:calc(var(--rect-width) - var(--neg-width));" height="40" fill="var(--tri)" stroke="rgb(128,128,128)" stroke-width="2"/>
+    <rect x="2" y="2" style="width:var(--neg-width);" height="40" fill="var(--illus)" stroke="rgb(128,128,128)" stroke-width="2" />
+    <rect x="2" y="55" style="transform:translateX(50px);width:calc(var(--rect-width) - var(--neg-width));" height="40" fill="var(--aside)" stroke="rgb(128,128,128)" stroke-width="2"/>
     <text x="2" y="27" style="transform:translateX(calc(var(--neg-width) / 2));" fill="var(--text)" font-family="sans-serif" font-size="14" text-anchor="middle">[0..127]</text>
     <text x="2" y="80" style="transform:translateX(calc(50px + var(--neg-width) / 2));" fill="var(--text)" font-family="sans-serif" font-size="14" text-anchor="middle">[128..255]</text>
-    <path d="M 400,27 Q 400,80 346,80" fill="none" stroke="var(--tri-border)" stroke-width="2" />
-    <path d="M -80,27 Q -80,80 55,80" fill="none" stroke="var(--tri-border)" stroke-width="2" />
-    <path d="M -80 25 L -85 37 L -72 35 Z" fill="var(--tri-border)" />
+    <path d="M 400,27 Q 400,80 346,80" fill="none" stroke="var(--aside-border)" stroke-width="2" />
+    <path d="M -80,27 Q -80,80 55,80" fill="none" stroke="var(--aside-border)" stroke-width="2" />
+    <path d="M -80 25 L -85 37 L -72 35 Z" fill="var(--aside-border)" />
 </svg>
 
 <br/>
@@ -171,8 +171,8 @@ interpretation of the numbers in the range [128..255].
 <br/><br/>
 
 <svg width="592" height="100" style="display:block;margin:auto; --rect-width: 588px;--neg-width: 294px;">
-    <rect x="2" y="2" style="width:var(--neg-width);" height="40" fill="var(--tri)" stroke="rgb(128,128,128)" stroke-width="2" />
-    <rect x="2" y="2" style="transform:translateX(var(--neg-width));width:calc(var(--rect-width) - var(--neg-width));" height="40" fill="var(--rec)" stroke="rgb(128,128,128)" stroke-width="2"/>
+    <rect x="2" y="2" style="width:var(--neg-width);" height="40" fill="var(--aside)" stroke="rgb(128,128,128)" stroke-width="2" />
+    <rect x="2" y="2" style="transform:translateX(var(--neg-width));width:calc(var(--rect-width) - var(--neg-width));" height="40" fill="var(--illus)" stroke="rgb(128,128,128)" stroke-width="2"/>
     <text x="2" y="27" style="transform:translateX(calc(var(--neg-width) / 2));" fill="var(--text)" font-family="sans-serif" font-size="14" text-anchor="middle">[-128..-1]</text>
     <text x="2" y="27" style="transform:translateX(calc(3 * var(--neg-width) / 2));" fill="var(--text)" font-family="sans-serif" font-size="14" text-anchor="middle">[0..127]</text>
     <path d="M 3 22 L 12 72" stroke="var(--text)" stroke-width="2"/>
@@ -187,8 +187,8 @@ interpretation of the numbers in the range [128..255].
 To look at it the other way around:
 
 <svg width="592" height="100" style="display:block;margin:auto; --rect-width: 588px;--neg-width: 294px;">
-    <rect x="2" y="2" style="width:var(--neg-width);" height="40" fill="var(--rec)" stroke="rgb(128,128,128)" stroke-width="2" />
-    <rect x="2" y="2" style="transform:translateX(var(--neg-width));width:calc(var(--rect-width) - var(--neg-width));" height="40" fill="var(--tri)" stroke="rgb(128,128,128)" stroke-width="2" />
+    <rect x="2" y="2" style="width:var(--neg-width);" height="40" fill="var(--illus)" stroke="rgb(128,128,128)" stroke-width="2" />
+    <rect x="2" y="2" style="transform:translateX(var(--neg-width));width:calc(var(--rect-width) - var(--neg-width));" height="40" fill="var(--aside)" stroke="rgb(128,128,128)" stroke-width="2" />
     <text x="2" y="27" style="transform:translateX(calc(var(--neg-width) / 2));" fill="var(--text)" font-family="sans-serif" font-size="14" text-anchor="middle">[0..127]</text>
     <text x="2" y="27" style="transform:translateX(calc(3 * var(--neg-width) / 2));" fill="var(--text)" font-family="sans-serif" font-size="14" text-anchor="middle">[-128..-1]</text>
     <path d="M 2 40 L 2 60" stroke="var(--text)" stroke-width="2"/>
@@ -203,14 +203,14 @@ To look at it the other way around:
 
 <br/>
 
-```rec: Example
+```illus: Example
 In this representation, our `163` is above 127, so it is interpreted as a
 negative number: `-93`.
 ```
 
-````trivia: Subtlety
-Notice the asymmetry between the largest `127` and lowest `-128` values that
-can be represented with a signed Byte.
+````aside: Subtlety
+Notice the asymetry between the largest `127` and lowest `-128` values that can
+be represented with a signed Byte.
 
 This is due to having `0` between the strictly positive and strictly negative
 numbers, but an even number of possible values for a Byte (256). So there are
@@ -223,7 +223,7 @@ could lead to a crash, many compilers would return `-128` as the result for this
 operation (`-(-128)` => `-128`), which is obviously mathematically incorrect,
 and can be quite confusing.
 
-```info> Why? (Requires familiarity with binary representations)
+```aside> Why? (Requires familiarity with binary representations)
 In practice, to negate a signed integer, the CPU is likely to invert all the
 bits and add 1.
 
@@ -253,7 +253,7 @@ the value of a Byte as how bright we want a pixel to be.
 
 - At `0`, it is black <span style="display: inline-block; width: 1.1em; height: 1.1em; background-color: #000000;border: 1px solid var(--text);vertical-align:middle;"></span>.
 - At `255`, it is white <span style="display: inline-block; width: 1.1em; height: 1.1em; background-color: #ffffff;border: 1px solid var(--text);vertical-align:middle;"></span>.
-```rec: Example
+```illus: Example
 - At `163`, it is a medium light-ish gray <span style="display: inline-block; width: 1.1em; height: 1.1em; background-color: #A3A3A3;border: 1px solid var(--text);vertical-align:middle;"></span>.
 ```
 
@@ -278,7 +278,7 @@ We could combine the [Signed Byte](#signed-bytes) trick with this, and have
 signed values that represent 8th: [-16, -15.75, -15.5, -15.25 .. -0.5, -0.25, 0,
 0.25, 0.5 .. 15.25, 15.5, 15.75].
 
-```rec: Example
+```illus: Example
 For `163`, as a signed fixed-point with 5 signed integer binary digits and 3
 fractional binary digits (i.e. made of 8<sup>th</sup>), we have already worked
 out that it reads as `-93` as a [Signed Byte](#signed-bytes). If we consider it
@@ -319,10 +319,10 @@ values when we step away from 0.
 <svg width="100%" viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg" role="img">
 <title>Three exponent bands of an 8-bit float, each twice the width of the last</title>
 <desc>A number line divided into three labelled regions I, II, and III, laid out edge to edge. Each region holds exactly 8 representable values, evenly spaced within it, but region II is twice as wide as region I, and region III is twice as wide as region II. The gap at each junction equals the new band's spacing, the moment the step size doubles.</desc>
-<rect x="40.00" y="40" width="85.71" height="80" rx="6" fill="var(--rec-border)" fill-opacity="0.18"/>
-<rect x="125.71" y="40" width="171.43" height="80" rx="6" fill="var(--tri-border)" fill-opacity="0.18"/>
-<rect x="297.14" y="40" width="342.86" height="80" rx="6" fill="var(--imp-border)" fill-opacity="0.18"/>
-<g stroke="var(--rec-label)" stroke-width="2">
+<rect x="40.00" y="40" width="85.71" height="80" rx="6" fill="var(--illus-border)" fill-opacity="0.18"/>
+<rect x="125.71" y="40" width="171.43" height="80" rx="6" fill="var(--aside-border)" fill-opacity="0.18"/>
+<rect x="297.14" y="40" width="342.86" height="80" rx="6" fill="var(--pitfall-border)" fill-opacity="0.18"/>
+<g stroke="var(--illus-label)" stroke-width="2">
 <line x1="40.00" y1="50" x2="40.00" y2="120"/>
 <line x1="50.71" y1="50" x2="50.71" y2="120"/>
 <line x1="61.43" y1="50" x2="61.43" y2="120"/>
@@ -332,7 +332,7 @@ values when we step away from 0.
 <line x1="104.29" y1="50" x2="104.29" y2="120"/>
 <line x1="115.00" y1="50" x2="115.00" y2="120"/>
 </g>
-<g stroke="var(--tri-label)" stroke-width="2">
+<g stroke="var(--aside-label)" stroke-width="2">
 <line x1="125.71" y1="50" x2="125.71" y2="120"/>
 <line x1="147.14" y1="50" x2="147.14" y2="120"/>
 <line x1="168.57" y1="50" x2="168.57" y2="120"/>
@@ -342,7 +342,7 @@ values when we step away from 0.
 <line x1="254.29" y1="50" x2="254.29" y2="120"/>
 <line x1="275.71" y1="50" x2="275.71" y2="120"/>
 </g>
-<g stroke="var(--imp-label)" stroke-width="2">
+<g stroke="var(--pitfall-label)" stroke-width="2">
 <line x1="297.14" y1="50" x2="297.14" y2="120"/>
 <line x1="340.00" y1="50" x2="340.00" y2="120"/>
 <line x1="382.86" y1="50" x2="382.86" y2="120"/>
@@ -383,7 +383,7 @@ But that's not even half of the headache.
 
 And then there are all the special cases.
 
-```rec: Example
+```illus: Example
 For instance, if I was to split `163` according to our format, I would get this:
 - `1` for the sign,
 - `4` for the raw Exponent,
@@ -403,7 +403,7 @@ The subtlety and complexity of floating point numbers is astonishing, but
 fortunately, their usage is simple. This makes them a double-edged sword: easy
 to use and powerful... until we start to look at them from up close.
 
-```trivia: What that complexity buys us
+```aside: What that complexity buys us
 While this representation is particularly complex, it has a great advantage:
 
 Even our naive 1-4-3 format allows to represent values both positive and
@@ -418,7 +418,7 @@ magnitude.
 
 ### The many Faces of a Byte
 
-```rec
+```illus
 That was 6 (or 8 if you went through the secret sections) different ways to look
 at a single Byte. We are barely scratching the surface, but hopefully, you start
 to see how a universe made of nothing else than numbers might not be boring
@@ -461,7 +461,7 @@ Bytes. The default size of a unit of data grew over time, and is often,
 currently, either 4 Bytes (32 bits) or 8 Bytes (64 bits) for the most common
 architectures.
 
-```trivia> The word "Word" is ambiguous...
+```aside> The word "Word" is ambiguous...
 The x86 architecture used, a long time ago, a Word that was 2 Bytes long. When
 they later doubled that, evolving the architecture to use 4-Byte-long values as
 the natural "default", they decided to keep their old definition of Word as a
@@ -526,7 +526,7 @@ In C++, to make it clear where such a sequence of characters ends, we require
 that it ends with a special character: the "null character", sometimes noted
 '`\0`' (which has the value `0`).
 
-```rec: Example
+```illus: Example
 So `76`, `105`, `107`, `101`, `32`, `116`, `104`, `97`, `116`, `46`, `0` can
 represent the words: "Like that.", complete with a null character at the end.
 ```
@@ -547,7 +547,7 @@ another Word for its height, and then we know that the picture will be made of
 *width*&times;*height* light intensity values, so we know how many Byte
 light-intensity value we expect next.
 
-```rec: Example
+```illus: Example
 Suppose we have an image that is 11 pixels wide, and 8 pixels high.
 We could write this:
 - `11` (our width)
@@ -565,7 +565,7 @@ If our Word size is 4 Bytes (32-bit architecture), that would be 96 Bytes that
 we can interpret as an image.
 ```
 
-```trivia> Colour Images
+```aside> Colour Images
 If we wanted to display a colour image, we could use more Byte values.
 
 Since the human eye can usually detect only 3 distinct elementary colours at
@@ -627,7 +627,7 @@ membrane is built to oscillate at specific frequencies with specific
 intensities. Please be careful if you play with that.
 
 ## 
-```info: Takeaway
+```recap: Takeaway
 - All a program manipulate is made of numbers, at the core.
 - There are many ways to look at these numbers and interpret them.
 - A Byte is a number made of 8 binary digits (8 bits). It can represent 256

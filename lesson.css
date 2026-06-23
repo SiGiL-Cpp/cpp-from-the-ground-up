@@ -12,25 +12,25 @@
   --muted:       #5a6580;
   --code-bg:     #12151f;
 
-  --rec:         #1a3a2a;
-  --rec-border:  #2e6e4e;
-  --rec-label:   #5dba8a;
+  --illus:         #1a3a2a;
+  --illus-border:  #2e6e4e;
+  --illus-label:   #5dba8a;
 
-  --imp:         #3a1f1a;
-  --imp-border:  #7a3a2e;
-  --imp-label:   #e07060;
+  --pitfall:         #3a1f1a;
+  --pitfall-border:  #7a3a2e;
+  --pitfall-label:   #e07060;
 
-  --tri:         #1a2a3a;
-  --tri-border:  #2e4e7a;
-  --tri-label:   #5a9ade;
+  --aside:         #1a2a3a;
+  --aside-border:  #2e4e7a;
+  --aside-label:   #5a9ade;
 
-  --ref:         #26261a;
-  --ref-border:  #5a5a2a;
-  --ref-label:   #b0a850;
+  --principle:         #26261a;
+  --principle-border:  #5a5a2a;
+  --principle-label:   #b0a850;
 
-  --info:        #1e1e2e;
-  --info-border: #3a3a5a;
-  --info-label:  #8888cc;
+  --recap:        #1e1e2e;
+  --recap-border: #3a3a5a;
+  --recap-label:  #8888cc;
 
   --play:        #111622;
   --play-border: #2a3560;
@@ -40,11 +40,11 @@
   --run-hover:   #2a50aa;
   --run-text:    #aaccff;
 
-  --rec-label-bg:  #162e22;
-  --imp-label-bg:  #2e1812;
-  --tri-label-bg:  #14202e;
-  --ref-label-bg:  #1e1e14;
-  --info-label-bg: #18182a;
+  --illus-label-bg:  #162e22;
+  --pitfall-label-bg:  #2e1812;
+  --aside-label-bg:  #14202e;
+  --principle-label-bg:  #1e1e14;
+  --recap-label-bg: #18182a;
   --play-label-bg: #0e1428;
 }
 
@@ -203,20 +203,20 @@ body {
 
 /* ─── Box Variants ─────────────────────────────────────────────────────────── */
 
-.box-rec       { background: var(--rec);  border-color: var(--rec-border); }
-.box-rec       > .box-label { color: var(--rec-label);  background: var(--rec-label-bg); }
+.box-illus       { background: var(--illus);  border-color: var(--illus-border); }
+.box-illus       > .box-label { color: var(--illus-label);  background: var(--illus-label-bg); }
 
-.box-important { background: var(--imp);  border-color: var(--imp-border); }
-.box-important > .box-label { color: var(--imp-label);  background: var(--imp-label-bg); }
+.box-pitfall { background: var(--pitfall);  border-color: var(--pitfall-border); }
+.box-pitfall > .box-label { color: var(--pitfall-label);  background: var(--pitfall-label-bg); }
 
-.box-trivia    { background: var(--tri);  border-color: var(--tri-border); }
-.box-trivia    > .box-label { color: var(--tri-label);  background: var(--tri-label-bg); }
+.box-aside    { background: var(--aside);  border-color: var(--aside-border); }
+.box-aside    > .box-label { color: var(--aside-label);  background: var(--aside-label-bg); }
 
-.box-ref       { background: var(--ref);  border-color: var(--ref-border); }
-.box-ref       > .box-label { color: var(--ref-label);  background: var(--ref-label-bg); }
+.box-principle       { background: var(--principle);  border-color: var(--principle-border); }
+.box-principle       > .box-label { color: var(--principle-label);  background: var(--principle-label-bg); }
 
-.box-info      { background: var(--info); border-color: var(--info-border); }
-.box-info      > .box-label { color: var(--info-label); background: var(--info-label-bg); }
+.box-recap      { background: var(--recap); border-color: var(--recap-border); }
+.box-recap      > .box-label { color: var(--recap-label); background: var(--recap-label-bg); }
 
 .box-playground { background: var(--play); border-color: var(--play-border); }
 .box-playground > .box-label { color: var(--play-label); background: var(--play-label-bg); }
@@ -238,11 +238,11 @@ body {
 .box-foldable > .box-body { border-top: 1px solid var(--border); }
 
 /* Each variant's own border colour for the body divider line */
-.box-rec.box-foldable       > .box-body { border-top-color: var(--rec-border); }
-.box-important.box-foldable > .box-body { border-top-color: var(--imp-border); }
-.box-trivia.box-foldable    > .box-body { border-top-color: var(--tri-border); }
-.box-ref.box-foldable       > .box-body { border-top-color: var(--ref-border); }
-.box-info.box-foldable      > .box-body { border-top-color: var(--info-border); }
+.box-illus.box-foldable       > .box-body { border-top-color: var(--illus-border); }
+.box-pitfall.box-foldable > .box-body { border-top-color: var(--pitfall-border); }
+.box-aside.box-foldable    > .box-body { border-top-color: var(--aside-border); }
+.box-principle.box-foldable       > .box-body { border-top-color: var(--principle-border); }
+.box-recap.box-foldable      > .box-body { border-top-color: var(--recap-border); }
 .box-playground.box-foldable > .box-body { border-top-color: var(--play-border); }
 .box-gadget.box-foldable    > .box-body { border-top-color: var(--play-border); }
 
@@ -358,7 +358,7 @@ body {
 /* ─── Error ────────────────────────────────────────────────────────────────── */
 
 .load-error {
-  color: var(--imp-label);
+  color: var(--pitfall-label);
   font-family: 'IBM Plex Mono', monospace;
   font-size: 0.9rem;
   padding: 2rem;
@@ -415,25 +415,25 @@ body {
   --muted:       #888480;
   --code-bg:     #eae9e4;
 
-  --rec:         #e8f5ee;
-  --rec-border:  #5dba8a;
-  --rec-label:   #1a6e42;
+  --illus:         #e8f5ee;
+  --illus-border:  #5dba8a;
+  --illus-label:   #1a6e42;
 
-  --imp:         #fdf0ee;
-  --imp-border:  #e07060;
-  --imp-label:   #9a2a1a;
+  --pitfall:         #fdf0ee;
+  --pitfall-border:  #e07060;
+  --pitfall-label:   #9a2a1a;
 
-  --tri:         #eef3fb;
-  --tri-border:  #5a9ade;
-  --tri-label:   #1a4a8a;
+  --aside:         #eef3fb;
+  --aside-border:  #5a9ade;
+  --aside-label:   #1a4a8a;
 
-  --ref:         #f8f6e8;
-  --ref-border:  #b0a850;
-  --ref-label:   #5a5010;
+  --principle:         #f8f6e8;
+  --principle-border:  #b0a850;
+  --principle-label:   #5a5010;
 
-  --info:        #f0f0f8;
-  --info-border: #8888cc;
-  --info-label:  #3a3a8a;
+  --recap:        #f0f0f8;
+  --recap-border: #8888cc;
+  --recap-label:  #3a3a8a;
 
   --play:        #eef1fa;
   --play-border: #4a7aff;
@@ -443,11 +443,11 @@ body {
   --run-hover:   #c0d4ff;
   --run-text:    #1a3aaa;
 
-  --rec-label-bg:  #d8eee0;
-  --imp-label-bg:  #fbe2dd;
-  --tri-label-bg:  #dde9f8;
-  --ref-label-bg:  #f0ecd8;
-  --info-label-bg: #e4e4f4;
+  --illus-label-bg:  #d8eee0;
+  --pitfall-label-bg:  #fbe2dd;
+  --aside-label-bg:  #dde9f8;
+  --principle-label-bg:  #f0ecd8;
+  --recap-label-bg: #e4e4f4;
   --play-label-bg: #d4dcf8;
 }
 

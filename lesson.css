@@ -11,6 +11,7 @@
   --text:        #cdd4e0;
   --muted:       #5a6580;
   --code-bg:     #12151f;
+  --href:        #6a9aff;
 
   --illus:         #1a3a2a;
   --illus-border:  #2e6e4e;
@@ -136,8 +137,8 @@ body {
 
 .lesson p { margin-bottom: 1.1rem; }
 
-.lesson a { color: var(--play-label); text-decoration: none; border-bottom: 1px solid #2a3560; }
-.lesson a:hover { border-color: var(--play-label); }
+.lesson a { color: var(--href); text-decoration: none; border-bottom: 1px solid #2a3560; }
+.lesson a:hover { border-color: var(--href); }
 
 .lesson code {
   font-family: 'IBM Plex Mono', monospace;
@@ -414,6 +415,7 @@ body {
   --text:        #1e1c1a;
   --muted:       #888480;
   --code-bg:     #eae9e4;
+  --href:        #0a3aff;
 
   --illus:         #e8f5ee;
   --illus-border:  #5dba8a;
@@ -519,14 +521,14 @@ body {
   font-size: 0.85rem;
   font-weight: 600;
   text-decoration: none;
-  color: var(--play-label);
+  color: var(--href);
   border: 1px solid var(--play-border);
   border-radius: 6px;
   padding: 0.5rem 1rem;
   transition: background 0.15s, border-color 0.15s;
 }
 
-.page-nav-link:hover { background: var(--play); border-color: var(--play-label); }
+.page-nav-link:hover { background: var(--play); border-color: var(--href); }
 
 .page-nav-disabled {
   font-family: 'IBM Plex Mono', monospace;

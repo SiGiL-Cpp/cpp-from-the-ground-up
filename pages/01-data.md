@@ -179,7 +179,7 @@ position "On", and Switches 2, 4, 5, and 6 in position "Off".
 Or the sequece `true`, `false`, `true`, `false`, `false`, `false`, `true`,
 `true`.
 
-Note how this matches [the binary representation of `163`](#octet).
+Note how this matches [the binary representation of `163`](#octet-bits).
 ```
 
 ````
@@ -424,7 +424,7 @@ But that's not even half of the headache.
   bias of 7. So if the raw value of the Exponent is 1, we should read the exponent
   as -6. If the raw value is 7, we should read it as 0. If the raw value is 14 (1
   less than the maximum value we can represent with 4 bits), we should read it as 7.
-- The `Mantissa` is a [fixed point](#byte-as-fixed-point) number. It is scaled
+- The `Mantissa` is a [fixed point](#bytes-as-fixed-point) number. It is scaled
   based on its number of bits: if it has 3 digits, it is divided by
   2<sup>3</sup> (i.e. it represents 8<sup>th</sup>).
 - If the `Exponent` raw value is not 0 (which is a special case mentioned
@@ -680,8 +680,8 @@ intensities. Please be careful if you play with that.
 ```recap: Takeaway
 - All a program manipulate is made of numbers, at the core.
 - There are many ways to look at these numbers and interpret them.
-- A Byte is a number made of 8 binary digits (8 bits). It can represent 256
-  different values.
+- A Byte is a number made of at least 8 binary digits (8 bits). It can represent
+  at least 256 different values.
   - It is the smallest unit of data the computer works with. 
 - A Word is a number usually made of more digits than a Byte. Nowadays usually
   32 or 64 binary digits (32 bits or 64 bits, 4 or 8 Bytes).

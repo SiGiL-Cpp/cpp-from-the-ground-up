@@ -12,7 +12,9 @@
   <script src="lesson.js"></script>
   <script>
     // Default lesson when no ?lesson= param is present
-    loadPage(pageFromURL('stub.md'));
+    loadPage(pageFromURL('stub.md')).then(() => {
+            scrollToAnchor(window.location.hash);
+        });;
   </script>
 </body>
 </html>

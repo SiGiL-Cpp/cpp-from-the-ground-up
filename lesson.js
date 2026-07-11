@@ -487,3 +487,22 @@ function pageFromURL(fallback) {
   const param = new URLSearchParams(window.location.search).get('page');
   return param ? `pages/${param}.md` : fallback;
 }
+
+function scrollToAnchor(targetId) {
+    if(!targetId) return;
+    const targetElement = document.querySelector(targetId);
+
+    if (targetElement) {
+        targetElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+
+        // Update the URL hash visually if it isn't already there
+        if (window.location.hash !== targetId) {
+            window.history.pushState(null, null, targetId);
+        }
+    } else {
+        console.warn(`Anchor element ${targetId} not found in the DOM.`);
+    }
+}

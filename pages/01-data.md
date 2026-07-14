@@ -605,15 +605,15 @@ In a similar way, a sequence of numbers, of Bytes, can be interpreted as an
 image. But for an image, we want to keep the value `0` for "completely black",
 so we can't use the same trick as the text to know when to stop.
 
-In addition, our image is 2D, it has a width and a height. We will need to know
-that if we want to display it properly.
+In addition, our image is 2D: it has a width and a height. We will need to know
+these if we want to display it properly.
 
 One solution would be to store these two values, as plain integral numbers.
 
 For instance, a [Word](#a-different-kind-of-word) for the Width of the image,
 another Word for its height, and then we know that the picture will be made of
-*width*&times;*height* light intensity values, so we know how many Byte
-light-intensity value we expect next.
+*width*&times;*height* [light intensity values](#bytes-as-light-intensity), so we know how many Byte
+light-intensity values we expect next.
 
 ```illus: Example
 Suppose we have an image that is 11 pixels wide, and 8 pixels high.
@@ -680,30 +680,33 @@ pulls a magnet attached to a membrane. The movement of this membrane sets the
 surrounding air in motion, and if it makes it vibrate somewhere between 20 times
 per second and 20,000 times per seconds, that's sound.
 
-So a series of values (a single Byte each, or often, two-Byte (16 bits) each)
-can represent exactly this movement.
+So a series of values, each representing how much to pull or push the magnet,
+allows to represent exactly this movement.
 
 There has been several format over time. In some old format, we use an unsigned
 8-bit value. `0` means pulling the membrane as far as it goes, and `255` pushing it
 as far as it goes the other way.
 
-Modern formats usually use signed values, often over 16 bits (2 Bytes), with a
-clearer `0` means leaving the membrane at rest.
+Modern formats usually use signed values, often over 16 bits (2 Bytes). The
+signed format gives a clearer `0` for leaving the membrane at rest (instead of
+`128` for the unsigned 8-bit format).
 
+```pitfall: Caution
 Worth noting that outputting random values to a speaker can damage it. The
 membrane is built to oscillate at specific frequencies with specific
 intensities. Please be careful if you play with that.
+```
 
 ## 
 ```recap: Takeaway
 - All a program manipulate is made of numbers, at the core.
 - There are many ways to look at these numbers and interpret them.
 - A Byte is a number made of at least 8 binary digits (8 bits). It can represent
-  at least 256 different values.
+  256 different values.
   - It is the smallest unit of data the computer works with. 
 - A Word is a number usually made of more digits than a Byte. Nowadays usually
   32 or 64 binary digits (32 bits or 64 bits, 4 or 8 Bytes).
 - Some representations are straight-forward, others are complicated.
 - With enough numbers we can represent any kind of content:
-  - Text, Images, Sound, etc...
+  - Text, Images, Animations, Sound, etc...
 ```

@@ -25,15 +25,17 @@ in base ten (decimal). In this numeration system, there are 10 different digits
 from 0 to 999.
 
 The computer internally uses a different numeration system, where there are only
-two different digits (0, 1). We can call it base two, or binary.
+two different digits (0, 1). We can call it "base two", or binary.
 
 In the same way than in base ten, `10` really means "one more than our highest
-digit 9", in base two, `10` means "one more than our highest digit 1", and thus
+digit 9"; in base two, `10` means "one more than our highest digit 1", and thus
 represent the number two.
 
 In binary, a 3-digit number can only express 8 different values: 0, 1, 10 (two),
 11 (three), 100 (four), 101 (five), 110 (six), and 111 (seven). It makes the
 numbers very long, but apart from this it doesn't change much.
+
+A digit in binary is called a **bit**.
 
 ```
 There are 10 types of people: those who understand binary and those who don't.
@@ -42,18 +44,16 @@ There are 10 types of people: those who understand binary and those who don't.
 ```aside: Note
 We won't go in details over the binary representation of numbers for now as it
 is not required for our current purpose. If you wish to investigate the subject,
-there are many good resources on the subject.
+there are many good resources online.
 - [Khan Academy](https://www.khanacademy.org/computing/computers-and-internet/xcae6f4a7ff015e7d:digital-information/xcae6f4a7ff015e7d:binary-numbers/a/bits-and-binary)
 - [Practical Networking YouTube](https://www.youtube.com/watch?v=RrJXLdv1i74)
 ```
 
-### Octet, Bits
+### Octet
 
-An Octet is nothing more than a binary number made of 8 binary digits. It can
-express 256 different values: from 0 to 11111111 in binary, which in decimal is
-255.
-
-A binary digit is called a Bit.
+An Octet is nothing more than a binary number made of 8 binary digits (8 bits).
+It can express 256 different values: from 0 to 11111111 in binary, which in
+decimal is 255.
 
 If you are bothered by the binary, it is fine to just admit an octet is a
 number that can have one of the 256 values between 0 and 255 (included).
@@ -67,33 +67,33 @@ binary it is written as: `10100011`.
 
 ## Byte
 
-A Byte is the smallest "addressable" unit of memory for a computation system. In
-practice, it is almost always the same thing as an Octet: an 8-digit binary
-number.
+A Byte is the smallest "addressable" unit of memory for a computation system.
+We will unpack what this means later on. In practice, it is almost always the
+same thing as an Octet: an 8-digit binary number.
 
 ```aside> Almost? ...
 If we want to be very accurate, in C++, the only guarantee we have is that a
-Byte is *at least* 8 binary-digits long. It could be more.
+Byte is *at least* 8 bits long. It could be more.
 
 The [Texas Instrument TMS320C28x](https://www.ti.com/lit/ug/spru514z/spru514z.pdf)
 architecture is a good example: in this architecture, a Byte is made of 16
 digits.
 
-Nowadays, such cases are exceptions, rare and far-apart.
+Nowadays, such cases are exceptions, rare and far-apart. We will assume 8-bits
+Bytes in this course, as it is the common case and adapting what will be said
+to exotic larger-Byte cases should be straigt-forward.
+
+If we write portable code (code that should work on any computer) we can only
+rely on the "at least" guarantee and consider that on most architectures, a
+Byte cannot express more than 256 distinct values.
 ```
 
 The important difference for us is that an octet is an 8-digit binary number,
 while a Byte is "what the computer works with". We are specifically interested
-in the later. It will almost always be the case that the computer happens to
-work with 8-digit binary numbers, but that is almost anecdotal.
+in the later. 
 
 So a Byte is the smallest kind of number the computer can work with. It is made
-of at least 8 binary digits, and thus can express at least 256 distinct values.
-
-If we write portable code (code that should work on any computer), or code for
-common architectures, we can only rely on the "at least" guarantee and consider
-that on some (most) architectures, a Byte cannot express more than 256 distinct
-values.
+of at least 8 binary digits, and thus can express 256 distinct values.
 
 ### Bytes as characters
 
@@ -124,10 +124,10 @@ simplest switch between two states, such as the dark/light theme switch in the
 upper-right corner of this page, the ever-present tickbox, or a "yes/no" answer.
 
 Although only one binary digit (0, 1) would be sufficient to encode this
-information, in C++ a full Byte (at least 8 binary digits) are used for the
-boolean representation. The reasons for this will make more sense later in this
-series, but for now we can say this is because a Byte is the smallest unit of
-memory the system can work with.
+information, in C++ a full Byte (8 bits) are used for the boolean
+representation. The reasons for this will make more sense later in this series,
+but for now we can say this is because a Byte is the smallest unit of memory
+the system can work with.
 
 **Through the boolean lens, numbers are interpreted in this way: if the number
 is `0`, it is `false`; otherwise, it is `true`.**
@@ -151,8 +151,8 @@ user preferences which are often a collection of yes/no answers. In this case,
 we sometimes decide to look at the Byte as multiple true/false values at once.
 
 Since a simple true/false value can be expressed using a single binary digit (0,
-1), and a Byte is made of at least 8 binary digits, we can store the values of
-8 true/false values in a single Byte.
+1), and a Byte is made of 8 binary digits, we can store the values of 8
+true/false values in a single Byte.
 
 The downside of this approach is its added complexity: it is a little more
 involved and more error-prone to write and retrieve these values.
@@ -160,10 +160,10 @@ involved and more error-prone to write and retrieve these values.
 Readers who are familiar with binary representations probably understand this
 immediately.
 
-Since a Byte is a number made of at least 8 digits that can take one of two
+Since a Byte is a number made of 8 digits (bits) that can take one of two
 values each (0 or 1), each digit can encode a true (1) or false (0) value.
 
-You could visualise the Byte as a row of at least 8 switches:
+You could visualise the Byte as a row of 8 switches:
 
 <p align="center">
   <img alt="8 switches" src="imgs/8switches.webp"/>
@@ -179,7 +179,7 @@ position "On", and Switches 2, 4, 5, and 6 in position "Off".
 Or the sequece `true`, `false`, `true`, `false`, `false`, `false`, `true`,
 `true`.
 
-Note how this matches [the binary representation of `163`](#octet-bits).
+Note how this matches [the binary representation of `163`](#octet).
 ```
 
 ````
@@ -187,8 +187,8 @@ Note how this matches [the binary representation of `163`](#octet-bits).
 ### Signed Bytes
 
 A range from 0 to 255 is useful, but sometimes we also want to use negative
-values. Since our Byte can only represent 256 distinct values (assuming 8 bits
-per Byte), we will have to repurpose some of its values to become negative.
+values. Since our Byte can only represent 256 distinct values, we will have to
+repurpose some of these values to become negative.
 
 <svg width="592" height="50" style="display:block;margin:auto; --rect-width: 588px;--neg-width: 294px;">
     <rect x="2" y="2" style="width:var(--neg-width);" height="40" fill="var(--illus)" stroke="rgb(128,128,128)" stroke-width="2"/>
@@ -250,6 +250,9 @@ To look at it the other way around:
     <text x="592" y="75" fill="var(--text)" font-family="sans-serif" font-size="14" text-anchor="end">255</text>
 </svg>
 
+After 127, we start interpreting values as negative number, from -128 to -1 in
+ascending order.
+
 <br/>
 
 ```illus: Example
@@ -258,8 +261,8 @@ negative number: `-93`.
 ```
 
 ````pitfall: Subtlety
-Notice the asymetry between the largest `127` and lowest `-128` values that can
-be represented with a signed Byte.
+Notice the asymetry between the largest `127` and the lowest `-128` values that
+can be represented with a signed Byte.
 
 This is due to having `0` between the strictly positive and strictly negative
 numbers, but an even number of possible values for a Byte (256). So there are
@@ -268,7 +271,8 @@ numbers, but an even number of possible values for a Byte (256). So there are
 Because of this, taking the negative of a signed Byte whose value is `-128` is
 an invalid operation (Undefined Behaviour), as it would yield `128` which cannot
 be represented as a signed Byte. In practice, although doing this operation
-could lead to a crash, many compilers would return `-128` as the result for this
+could lead to a crash (Undefined Behaviour is something we should avoid as much
+as possible), many compilers would return `-128` as the result for this
 operation (`-(-128)` => `-128`), which is obviously mathematically incorrect,
 and can be quite confusing.
 
@@ -276,7 +280,7 @@ and can be quite confusing.
 In practice, to negate a signed integer, the CPU is likely to invert all the
 bits and add 1.
 
-Yes, that works. In all the valid cases.
+Yes, that works. In all the valid cases, that is.
 
 - Consider `1`. Inverting all the bits gives `0b11111110` (`0xFE`). And adding 1
   to this gives `0b11111111` (`0xFF`), 255, which, if you check above, happens
@@ -289,7 +293,7 @@ Yes, that works. In all the valid cases.
 
 But what happens with `-128`? We apply same pattern, of course.
 - `-128` is `0b10000000` (`0x80`). When we invert it, we get `0b01111111`
-  (`0x7F`). To which we add 1, giving `0b10000000` (`0x80`).
+  (`0x7F`). To which we add 1, giving `0b10000000` (`0x80`), back to `-128`.
 ```
 
 ````
@@ -301,19 +305,19 @@ pixels, and these pixels can send more or less light intensity. We can interpret
 the value of a Byte as how bright we want a pixel to be.
 
 ```illus: Example
-- At `0`, it is black <span style="display: inline-block; width: 1.1em; height: 1.1em; background-color: #000000;border: 1px solid var(--text);vertical-align:middle;"></span>.
-- At `163`, it is a medium light-ish gray 
-<span style="display: inline-block; width: 1.1em; height: 1.1em; background-color: #A3A3A3;border: 1px solid var(--text);vertical-align:middle;"></span>
-- At `255`, it is white <span style="display: inline-block; width: 1.1em; height: 1.1em; background-color: #ffffff;border: 1px solid var(--text);vertical-align:middle;"></span>.
+- At <code>&nbsp;0&nbsp;</code>, it is <span style="display: inline-block; width: 1.1em; height: 1.1em; background-color: #000000;border: 1px solid var(--text);vertical-align:middle;"></span> black.
+- At `163`, it is 
+<span style="display: inline-block; width: 1.1em; height: 1.1em; background-color: #A3A3A3;border: 1px solid var(--text);vertical-align:middle;"></span> a medium light-ish gray.
+- At `255`, it is <span style="display: inline-block; width: 1.1em; height: 1.1em; background-color: #ffffff;border: 1px solid var(--text);vertical-align:middle;"></span> white.
 ```
 
 ### Bytes as &real;eal numbers
 
 We now have positive and negative numbers, but there's a whole infinity of
 numbers between 0 and 1. How do we tap into this range? As we have said before,
-we only have 256 different values for a Byte (assuming 8 bits per Byte), so we
-will have to find strategies to use these values wisely. The most common way is
-through floating-point, but floating-points are complicated.
+we only have 256 different values for a Byte, so we will have to find
+strategies to use these values wisely. The most common way is through
+floating-point, but floating-points are complicated.
 
 #### Bytes as Fixed point
 
@@ -339,7 +343,9 @@ made of 8<sup>th</sup>, we have -93/8 = `-11.625`.
 
 The floating-point representation will make more sense later on, but I wanted to
 introduce it here, as it is heavily used in all kind of applications, and more
-tricky than most people realise.
+tricky than most people realise. Don't worry if you don't get the details, it's
+a folded section for a reason. If you remember that floating points are a
+tricky representation, that's good enough.
 
 One key idea behind this representation is that we usually care about precision
 for small numbers, and not so much for large ones. For instance, over a
@@ -360,11 +366,11 @@ There are different format. For our purpose, we will choose:
 - 4 bits for the Exponent,
 - 3 bits for the Mantissa.
 
-This means that every 8 (2<sup>3</sup>) values, we will double the space between our
-values when we step away from 0.
-
 **The short version is that the number is computed as `sign`
 2<sup>`Exponent`</sup> `Mantissa`.**
+
+3 bits for the *mantissa* means that every 8 (2<sup>3</sup>) values, we will
+double the space between our values when we step away from 0.
 
 <svg width="100%" viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg" role="img">
 <title>Three exponent bands of an 8-bit float, each twice the width of the last</title>
@@ -434,20 +440,23 @@ But that's not even half of the headache.
 And then there are all the special cases.
 
 ```illus: Example
-For instance, if I was to split `163` according to our format, I would get this:
-- `1` for the sign,
-- `4` for the raw Exponent,
-- `3` for the Mantissa.
+For instance, if we were to split `163` according to our format, we would get
+this:
+- The value `1` for the sign,
+- The value `4` for the raw Exponent,
+- The value `3` for the Mantissa.
 
 The Exponent is neither 0 nor 15, so we read it by subtracting 7 from it. 
 4 - 7 = `-3`.
 
 Since the Exponent is not 0, we should read the Mantissa as a fixed point number
 made of 8<sup>th</sup> and add a leading 1 before it. Three 8<sup>th</sup> is
-`0.375`, and with a leading 0, we get `1.375`.
+`0.375`, and with a leading 1, we get `1.375`.
 
 We can finally form the final result: - 2<sup>-3</sup> × 1.375 = - 0.125 × 1.375 = `-0.171875`.
 ```
+
+Don't worry if you didn't follow everything there, it isn't important for now.
 
 The subtlety and complexity of floating point numbers is astonishing, but
 fortunately, their usage is simple. This makes them a double-edged sword: easy
@@ -461,9 +470,9 @@ negative with magnitudes as large as `240` (though near that magnitude
 consecutive values are spaced 16 apart), or as small as `0.015625` (with a gap
 of only about 0.002 between consecutive values at that scale).
 
-Floating points should be used in situations where we accept this property:
-It is precise around `0` but that precision degrades as the values grow in
-magnitude.
+Floating points should be used in situations where we accept and welcome this
+property: It is precise around `0` but that precision degrades as the values
+grow in magnitude.
 ```
 
 ### The many Faces of a Byte
@@ -506,24 +515,33 @@ we look at audio formats.
 
 ### A different kind of Word
 
-A Word in computing, used to refer to the "default" or "natural" size of the
-data for a specific architecture. So a Word is not a specific, set number of
-Bytes. The default size of a unit of data grew over time, and is often, 
-currently, either 4 Bytes (32 bits) or 8 Bytes (64 bits) for the most common
-architectures.
+A Word in computing used to refer to the "default" or "natural" size of the
+data for a specific architecture. The processor's favourite type of numbers. So
+a Word is not a specific, set number of Bytes. The default size of a unit of
+data grew over time, and is often, currently, either 4 Bytes (32 bits) or 8
+Bytes (64 bits) for the most common architectures.
 
 ```aside> The word "Word" is ambiguous...
 The x86 architecture used, a long time ago, a Word that was 2 Bytes long. When
-they later doubled that, evolving the architecture to use 4-Byte-long values as
-the natural "default", they decided to keep their old definition of Word as a
-2-Byte-long value, and called the new 4-Byte values Doubleword (DWORD). Later,
-8-Byte-long values were introduced as Quadwords (QWORD).
+they later doubled that, evolving the architecture to use 4-Bytes-long values
+as the natural "default", they decided to keep their old definition of Word as
+a 2-Byte-long value, and called the new 4-Bytes values Doubleword (DWORD).
+Later, 8-Bytes-long values were introduced as Quadwords (QWORD).
 
-This departure from the original definition of a Word creates ambiguity, and we
-will prefer starting to call the types by their number of bits.
+This departure from the original definition of a Word creates ambiguity:
+- The traditional definition where it is whichever number of Bytes a CPU
+  "prefers"
+- Intel's definition (adopted in Windows API too), where it is specifically 2
+  Bytes.
+
+To avoid ambiguity, we will prefer starting to call the types by their number
+of bits instead.
 ```
 
-### What does that change?
+With 4 or 8 Bytes stacked together, the representations still work in the same
+way than before, but we have many more values to play with.
+
+### What does using several Bytes together change?
 
 - For the unsigned integral numbers, the range of representable numbers grows
   (a lot).

@@ -134,6 +134,8 @@ a little careful.
   `1126367232`).
 - If we write `'£'`, the value is of type `char` (its underlying value is
   `163`).
+- `true` and `false` are special values of type `bool` (with underlying values
+  `1` and `0` respectively).
 ```
 
 This might be intimidating at first, but it is actually somewhat convenient:
@@ -226,3 +228,11 @@ type label {value};
 
 There are other ways to initialize variables, so don't be too surprised if you
 see something different in C++ code you read elsewhere.
+
+````illus
+```cpp
+char firstLetter {'@'};
+bool isUppercase {true};
+std::uint8_t alpha {42u};
+```
+````
